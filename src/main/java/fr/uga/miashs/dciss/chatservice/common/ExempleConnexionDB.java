@@ -19,7 +19,7 @@ public class ExempleConnexionDB {
 	public static void main(String[] args) {		
 		
 		try {
-			Connection cnx = DriverManager.getConnection("jdbc:derby:target/sample;create=true");//"jdbc:sqlite:sample.db");//
+			Connection cnx = DriverManager.getConnection("jdbc:sqlite:sample.db");//"jdbc:derby:target/sample;create=true");//
 			
 			cnx.createStatement().executeUpdate("CREATE TABLE MsgUser (id INT PRIMARY KEY, nickname VARCHAR(20))");
 
