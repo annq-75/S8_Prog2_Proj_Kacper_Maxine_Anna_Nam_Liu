@@ -76,4 +76,72 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 * []()
 
 
+**********Сдшуте***************
+Authentification / Connexion :
+Connexion avec un identifiant existant ou enregistrement (si l’ID = 0).
 
+***Échange de messages :***
+Envoi et réception de messages privés.
+
+Envoi et réception de messages dans des groupes.
+
+Envoi de fichiers.
+
+*** Gestion des groupes ***
+Création d’un groupe.
+
+Ajout / suppression d’utilisateurs dans un groupe.
+
+Suppression d’un groupe (par le créateur uniquement).
+
+***Informations sur l’utilisateur :***
+Définir et demander un pseudonyme (nickname).
+
+Définir / demander un avatar.
+
+Afficher la liste des membres d’un groupe.
+
+***Historique / stockage local :***
+Sauvegarde de l’historique des messages.
+
+Enregistrement des fichiers reçus.
+
+Informations sur les contacts et groupes (via SQLite).
+
+*********************Serv*************************
+***Gestion des connexions :***
+Attribution d’un identifiant aux nouveaux clients.
+
+Association d’un identifiant à une connexion active.
+
+***Transmission des messages :***
+Routage des messages vers les clients concernés.
+
+Diffusion des messages dans les groupes.
+
+Stockage temporaire des messages non distribués.
+
+***Gestion des utilisateurs et des groupes :***
+Création et suppression de groupes.
+
+Stockage des membres du groupe et de son propriétaire.
+
+***Sauvegarde des données :**
+Enregistrement des identifiants, groupes et messages (sérialisation / JSON).
+
+*** Gestion des commandes et erreurs :***
+Réponses aux requêtes incorrectes.
+
+Notifications envoyées aux clients.
+
+
+
+****************common**************************
+
+Paquets de messages standards.
+
+Paquets de gestion (groupes, utilisateurs).
+
+Paquets de service (erreurs, notifications, etc.).
+
+Paquets de données (fichiers, avatars).
