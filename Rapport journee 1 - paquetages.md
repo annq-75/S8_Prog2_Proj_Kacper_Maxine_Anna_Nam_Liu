@@ -46,6 +46,9 @@ nom d'utilisateur: taille variable (0 si on le connait pas??)
 id utilisateur : 1 octet (0 si on ne le connait pas??)
 nom d'utilisateur: taille variable (0 si on le connait pas??)
 - envoie de message -> 5
+id utilisateur/groupe : 1 octet
+contenu : taille variable
+
 
 
 **- Du serveur vers un client**
@@ -57,25 +60,32 @@ id expéditeur | id destinataire | longueur des données(en octets) | les donnee
 DATA:
 Types d'action et données de l'action:
 - Envoie d'erreur -> 1
-message d'erreur : taille variable (la variation provient )
+message d'erreur : taille variable (la variation provient de type d'erreur enregistré )
 - Demande de confirmation (???) -> 2
 - Envoie de message stocké -> 3
 - 
 
 #### Des paquetages en plus pour communiquer avec la base de données :
 
-**- d'un client vers la base de donnée**
 
-id destinataire | longueur des données(en octets) | les donnees (data)
-4 octets (int) | 4 octets (int) | taille variable dont le nb d'octets a été donné juste avant
+**- du client vers la base de donnée** (pas sur de cette partie, est-ce qu'il y a vraiment un lient avec ce qu'on fait?)
 
+id expéditeur | id destinataire | longueur des données(en octets) | les donnees (data)
+4 octets (int) | 4 octets (int) | 4 octets (int) | taille variable dont le nb d'octets a été donné juste avant
 
+DATA
+Types d'action et données de l'action:
+- enregistrement de l'historique de messages -> 1
 
 **- du serveur vers la base de donnée**
 
 id expéditeur | id destinataire | longueur des données(en octets) | les donnees (data)
 4 octets (int) | 4 octets (int) | 4 octets (int) | taille variable dont le nb d'octets a été donné juste avant
 
+DATA
+Types d'action et données de l'action:
+- Stockage de message envoyé (non reçu) -> 1
+message : taille variable
 
 Paquetages en plus pour que la BDD puisse communiquer avec le serveur ou le client??? redondance???
 
