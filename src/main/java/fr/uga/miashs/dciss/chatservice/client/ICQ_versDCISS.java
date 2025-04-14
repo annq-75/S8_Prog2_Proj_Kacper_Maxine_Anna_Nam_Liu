@@ -20,11 +20,13 @@ import java.awt.Rectangle;
 import java.net.UnknownHostException;
 import java.awt.Color;
 import javax.swing.SwingConstants;
+import javax.swing.JScrollPane;
 
 public class ICQ_versDCISS {
 
 	private JFrame frame;
 	private ClientMsg client;
+	private JTextArea textArea_msgs;
 
 	/**
 	 * Launch the application.
@@ -50,7 +52,7 @@ public class ICQ_versDCISS {
 	        initialize();
 	    } catch (UnknownHostException e) {
 	        e.printStackTrace();
-	        // можно показать диалог с ошибкой:
+	        // show err:
 	        JOptionPane.showMessageDialog(null, "Connection to server is impossible.");
 	    }
 	}
@@ -63,7 +65,7 @@ public class ICQ_versDCISS {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		ClientMsg client = new ClientMsg("localhost", 1666); 
+		client = new ClientMsg("localhost", 1666); 
 		//Un objet ClientMsg est créé, qui se connecte au serveur à l’adresse localhost 
 		//(c’est-à-dire sur le même ordinateur) et au port 1666.
 		
@@ -105,6 +107,7 @@ public class ICQ_versDCISS {
 		panel_7.add(panel_nickshow);
 		
 		JTextArea textArea_SendTO = new JTextArea();
+		textArea_SendTO.setColumns(1);
 		textArea_SendTO.setBackground(UIManager.getColor("CheckBox.light"));
 		panel_nickshow.add(textArea_SendTO);
 		
@@ -156,16 +159,29 @@ public class ICQ_versDCISS {
 		panel_8.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel_2.add(panel_8);
 		
-		JTextArea textArea_msgs = new JTextArea();
-		textArea_msgs.setBounds(new Rectangle(70, 70, 70, 70));
-		panel_2.add(textArea_msgs);
+		//JTextArea textArea_msgs = new JTextArea();
+		//textArea_msgs = new JTextArea();
+		//textArea_msgs.setBounds(new Rectangle(70, 70, 70, 70));
+		//panel_2.add(textArea_msgs);
 		
-		client.addMessageListener(p -> {
+		textArea_msgs = new JTextArea(10, 30); // strs and clmns
+		textArea_msgs.setLineWrap(true);
+		textArea_msgs.setWrapStyleWord(true);
+		textArea_msgs.setEditable(false); // user have not to change the messages that are comming
+		JScrollPane scrollPane = new JScrollPane(textArea_msgs);
+		panel_2.add(scrollPane);
+		
+		/*client.addMessageListener(p -> {
 		    String message = p.srcId + " says to " + p.destId + ": " + new String(p.data) + "\n";
 		    EventQueue.invokeLater(() -> textArea_msgs.append(message)); 
 		    //EventQueue.invokeLater() est utilisé pour mettre à jour 
 		    //l’interface utilisateur dans le thread de l’interface graphique (UI).
 		//------------------------------------
+		});*/
+		
+		client.addMessageListener(p -> {
+		    String msg = p.srcId + " says: " + new String(p.data) + "\n";
+		    EventQueue.invokeLater(() -> textArea_msgs.append(msg));
 		});
 		
 		JPanel panel_3 = new JPanel();
