@@ -183,6 +183,78 @@ public class ClientMsg {
 		s = null;
 		notifyConnectionListeners(false);
 	}
+	
+	//=============================================Ajout manuellement============================================================
+	//Ajout un menu pour demander au user s'il veux créer un groupe
+	public void handleUserInteraction() {
+	    Scanner sc = new Scanner(System.in);
+	    String input = "";
+
+	    while (true) {
+	        System.out.println("\nQue voulez-vous faire ?");
+	        System.out.println("1. Envoyer un message");
+	        System.out.println("2. Créer un groupe");
+	        System.out.println("3. Quitter");
+	        System.out.print("Votre choix: ");
+	        input = sc.nextLine();
+
+	        switch (input) {
+	            case "1":
+	                handleSendMessage(sc);
+	                break;
+	            case "2":
+	                handleCreateGroup(sc);
+	                break;
+	            case "3":
+	                closeSession();
+	                return;
+	            default:
+	                System.out.println("Choix invalide !");
+	        }
+	    }
+	}
+	
+	private void handleSendMessage(Scanner sc) {
+	    try {
+	        System.out.print("ID du destinataire (Utilisateur positif / Groupe négatif) : ");
+	        int destId = Integer.parseInt(sc.nextLine());
+
+	        System.out.print("Votre message : ");
+	        String message = sc.nextLine();
+
+	        sendPacket(destId, message.getBytes());  // 复用sendPacket
+	        System.out.println("Message envoyé à " + destId);
+
+	    } catch (NumberFormatException e) {
+	        System.out.println("Identifiant invalide !");
+	    }
+	}
+	
+	private void handleCreateGroup(Scanner sc) {
+	    try {
+	        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	        DataOutputStream dos = new DataOutputStream(bos);
+
+	        dos.writeByte(1);  // 操作码1：创建群组
+
+	        System.out.print("Combien de membres voulez-vous ajouter ? ");
+	        int nbMembers = Integer.parseInt(sc.nextLine());
+	        dos.writeInt(nbMembers);
+
+	        for (int i = 0; i < nbMembers; i++) {
+	            System.out.print("ID du membre " + (i + 1) + " : ");
+	            int memberId = Integer.parseInt(sc.nextLine());
+	            dos.writeInt(memberId);
+	        }
+
+	        dos.flush();
+	        sendPacket(0, bos.toByteArray());  // 0 = 发给服务器，要求创建群组
+	        System.out.println("Demande de création de groupe envoyée au serveur.");
+
+	    } catch (Exception e) {
+	        System.out.println("Erreur lors de la création du groupe : " + e.getMessage());
+	    }
+	}
 
 	public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {
 		ClientMsg c = new ClientMsg("localhost", 1666);
@@ -195,27 +267,28 @@ public class ClientMsg {
 
 		c.startSession();
 		System.out.println("Vous êtes : " + c.getIdentifier());
-
+		
+		c.handleUserInteraction();
 		// Thread.sleep(5000);
 
 		// l'utilisateur avec id 4 crée un grp avec 1 et 3 dedans (et lui meme)
-		if (c.getIdentifier() == 4) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			DataOutputStream dos = new DataOutputStream(bos);
-
-			// byte 1 : create group on server
-			dos.writeByte(1);
-
-			// nb members
-			dos.writeInt(2);
-			// list members
-			dos.writeInt(1);
-			dos.writeInt(3);
-			dos.flush();
-
-			c.sendPacket(0, bos.toByteArray());
-
-		}
+//		if (c.getIdentifier() == 4) {
+//			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//			DataOutputStream dos = new DataOutputStream(bos);
+//
+//			// byte 1 : create group on server
+//			dos.writeByte(1);
+//
+//			// nb members
+//			dos.writeInt(2);
+//			// list members
+//			dos.writeInt(1);
+//			dos.writeInt(3);
+//			dos.flush();
+//
+//			c.sendPacket(0, bos.toByteArray());
+//
+//		}
 		
 		
 
