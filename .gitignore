@@ -32,8 +32,10 @@ local.properties
 .buildpath
 
 # sbteclipse plugin
-.target
+.target/
+.idea/
 
+target/
 # Tern plugin
 .tern-project
 
