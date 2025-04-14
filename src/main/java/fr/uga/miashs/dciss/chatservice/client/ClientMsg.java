@@ -184,6 +184,100 @@ public class ClientMsg {
 		notifyConnectionListeners(false);
 	}
 
+	// Envoyer les informations de connexion au serveur
+
+	/**
+	 * Se connecte au serveur avec un nom d'utilisateur et un mot de passe.
+	 * 
+	 * @param serverAddress L'adresse du serveur
+	 * @param serverPort    Le port du serveur
+	 * @param username      Le nom d'utilisateur
+	 * @param password      Le mot de passe
+	 * @return true si la connexion est réussie, sinon false
+	 */
+	public boolean connectToServer(String serverAddress, int serverPort, String username, String password) {
+		try {
+			// Établir une connexion avec le serveur
+			s = new Socket(serverAddress, serverPort);
+			dis = new DataInputStream(s.getInputStream());
+			dos = new DataOutputStream(s.getOutputStream());
+
+			// Envoyer les informations de connexion
+			dos.writeUTF(username);
+			dos.writeUTF(password);
+			dos.flush();
+
+			// Recevoir la réponse du serveur
+			int userId = dis.readInt();
+			if (userId == -1) {
+				System.out.println("Échec de la connexion ! Vérifiez le nom d'utilisateur ou le mot de passe.");
+				s.close();
+				return false; // Connexion échouée
+			} else {
+				System.out.println("Connexion réussie ! ID utilisateur : " + userId);
+				// Continuer le traitement après une connexion réussie
+				startMessaging();
+				return true; // Connexion réussie
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false; // Erreur de connexion
+		}
+	}
+
+	/**
+	 * Vérifie si les informations d'authentification sont valides.
+	 * 
+	 * @param username Le nom d'utilisateur
+	 * @param password Le mot de passe
+	 * @return true si les informations sont valides, sinon false
+	 */
+	public boolean isAuthenticated(String username, String password) {
+		// Implémenter la logique d'authentification ici
+		// Retourne true si le nom d'utilisateur et le mot de passe sont valides
+		return "validUser".equals(username) && "validPass".equals(password);
+	}
+
+	/**
+	 * Enregistre un nouvel utilisateur sur le serveur.
+	 * 
+	 * @param username Le nom d'utilisateur
+	 * @param password Le mot de passe
+	 * @return true si l'enregistrement est réussi, sinon false
+	 */
+	public boolean register(String username, String password) {
+		try {
+			// Envoyer une requête d'enregistrement au serveur
+			sendPacket(1, (username + ":" + password).getBytes()); // Exemple : type de paquet 1 pour l'enregistrement
+			byte[] response = receivePacketFromServer();
+			String responseStr = new String(response);
+			return responseStr.equals("SUCCESS");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	/**
+	 * Reçoit un paquet du serveur.
+	 * 
+	 * @return le tableau d'octets reçu
+	 * @throws IOException si une erreur d'E/S se produit
+	 */
+	private byte[] receivePacketFromServer() throws IOException {
+		int length = dis.readInt();
+		byte[] data = new byte[length];
+		dis.readFully(data);
+		return data;
+	}
+
+	
+
+	private void startMessaging() {
+		// Logique pour envoyer et recevoir des messages après une connexion réussie
+		System.out.println("Commencer à envoyer et recevoir des messages...");
+	}
+
 	public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {
 		ClientMsg c = new ClientMsg("localhost", 1666);
 
