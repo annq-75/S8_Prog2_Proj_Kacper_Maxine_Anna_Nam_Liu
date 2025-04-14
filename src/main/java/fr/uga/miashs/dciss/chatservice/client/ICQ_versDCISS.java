@@ -18,6 +18,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
 import java.awt.Rectangle;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.awt.Color;
 import javax.swing.SwingConstants;
 import javax.swing.JScrollPane;
@@ -86,11 +87,20 @@ public class ICQ_versDCISS {
 		panel_6.add(panel_showid);
 		
 		JTextArea textArea_showid = new JTextArea();
-		textArea_showid.setBackground(UIManager.getColor("CheckBox.background"));
+		textArea_showid.setBackground(new Color(240, 248, 255));
 		panel_showid.add(textArea_showid);
 		
 		//start session
 		client.startSession();
+		
+		//for the case when we are not connected anymore
+		client.addConnectionListener(active -> {
+		    if (!active) {
+		        JOptionPane.showMessageDialog(frame, "Connexion perdue.");
+		        System.exit(0);
+		    }
+		});
+		//read and write yours id
 		textArea_showid.setText("" + client.getIdentifier());
 		
 		JPanel panel_7 = new JPanel();
@@ -108,7 +118,7 @@ public class ICQ_versDCISS {
 		
 		JTextArea textArea_SendTO = new JTextArea();
 		textArea_SendTO.setColumns(1);
-		textArea_SendTO.setBackground(UIManager.getColor("CheckBox.light"));
+		textArea_SendTO.setBackground(new Color(240, 255, 240));
 		panel_nickshow.add(textArea_SendTO);
 		
 		JPanel panel_1 = new JPanel();
@@ -214,14 +224,18 @@ public class ICQ_versDCISS {
 		
 		btn_send.addActionListener(e -> {
 		    try {
-		        // Supposons que l’utilisateur saisit l’ID du destinataire dans le textArea_SendTO.
-		        int dest = Integer.parseInt(textArea_SendTO.getText().trim());
+		        int dest = Integer.parseInt(textArea_SendTO.getText().trim());//trim for deleting spaces at the beginning and at the end of the string
 		        String msg = textArea_yourmsg.getText();
 
-		        client.sendPacket(dest, msg.getBytes());
-		        textArea_yourmsg.setText(""); // permet de nettoyer le champ de saisie
+		        client.sendPacket(dest, msg.getBytes(StandardCharsets.UTF_8));
+
+		        // add message to the main area
+		        String affichage = "[Moi → " + dest + "] : " + msg + "\n";
+		        textArea_msgs.append(affichage);
+
+		        textArea_yourmsg.setText(""); // очищаем поле ввода
 		    } catch (NumberFormatException ex) {
-		        textArea_msgs.append("Invalid recipient ID\n");
+		        textArea_msgs.append("ID invalide\n");
 		    }
 		});
 		
