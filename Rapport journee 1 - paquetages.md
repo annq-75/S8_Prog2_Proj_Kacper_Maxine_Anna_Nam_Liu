@@ -33,11 +33,19 @@ id destinataire | longueur des données(en octets) | les donnees (data)
 4 octets (int) | 4 octets (int) | taille variable dont le nb d'octets a été donné juste avant
 
 DATA:
-Types d'action:
-- 
-- 
-- 
-- 
+Types d'action et données de l'action:
+- création d'un groupe -> 1
+nombre de mbres: 1 octet
+nom du groupe: Taille variable 
+- supression d'un groupe -> 2
+nom du groupe : taille variable
+- ajout d'utilisateurs -> 3
+id utilisateur : 1 octet (0 si on ne le connait pas??)
+nom d'utilisateur: taille variable (0 si on le connait pas??)
+- supression d'utilisateurs -> 4
+id utilisateur : 1 octet (0 si on ne le connait pas??)
+nom d'utilisateur: taille variable (0 si on le connait pas??)
+- envoie de message -> 5
 
 
 **- Du serveur vers un client**
@@ -46,12 +54,22 @@ id expéditeur | id destinataire | longueur des données(en octets) | les donnee
 4 octets (int) | 4 octets (int) | 4 octets (int) | taille variable dont le nb d'octets a été donné juste avant
 
 
+DATA:
+Types d'action et données de l'action:
+- Envoie d'erreur -> 1
+message d'erreur : taille variable (la variation provient )
+- Demande de confirmation (???) -> 2
+- Envoie de message stocké -> 3
+- 
+
 #### Des paquetages en plus pour communiquer avec la base de données :
 
 **- d'un client vers la base de donnée**
 
 id destinataire | longueur des données(en octets) | les donnees (data)
 4 octets (int) | 4 octets (int) | taille variable dont le nb d'octets a été donné juste avant
+
+
 
 **- du serveur vers la base de donnée**
 
