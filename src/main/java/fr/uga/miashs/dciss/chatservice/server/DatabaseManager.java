@@ -4,18 +4,46 @@ import java.sql.*;
 
 public class DatabaseManager {
     private static final String DB_URL = "jdbc:sqlite:chatservice.db";
+    
+    //sql queries to create each database
+    // côté Serveur
+    private static final String sqlUsers = "CREATE TABLE IF NOT EXISTS users (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "username TEXT NOT NULL UNIQUE, " +
+            "password TEXT NOT NULL, " +
+            "connected BOOLEAN NOT NULL DEFAULT 0)";   //table liée aux listes d'utilisateurs connectés et déconnectés
+    private static final String sqlGroupUsers = "CREATE TABLE IF NOT EXISTS groupUsers (" +
+    		"idGroupUser INTEGER NOT NULL PRIMARY KEY, " +
+    		"idGroup INTEGER NOT NULL, " +
+    		"idUser INTEGER NOT NULL)";
+    private static final String sqlGroups = "CREATE TABLE IF NOT EXISTS groups (" +
+    		"idGroup INTEGER NOT NULL PRIMARY KEY, " +
+    		"idOwner INTEGER NOT NULL)";
+    private static final String sqlMsgToBeServed = "CREATE TABLE IF NOT EXISTS msgToBeServed (" +
+    		"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+    		"idReceiver INTEGER NOT NULL, " +
+    		"idSender INTEGER NOT NULL, " +
+    		"content TEXT, " +
+    		"delivered BOOLEAN NOT NULL DEFAULT 0)";  // 1/yes/true if message is sent already (i.e. if the receiver is connected and received the message 
+    				// and so, if yes, the line will be deleted so no data is kept unnecessarily by the server database 
+    
+    // côté Client
+    // pas sûr qu'on se serve d'une table ici, voir plus tard
+    /*private static final String sqlMsgSent = "CREATE TABLE IF NOT EXISTS msgSent (" +
+    		"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+    		"idReceiver INTEGER NOT NULL, " +  // group id if negative or user id if positive
+    		"idSender INTEGER NOT NULL, " +    // group id if negative or user id if positive
+    		"content TEXT)";
+    */
+    
 
     // Phương thức tiện ích để lấy kết nối cơ sở dữ liệu
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(DB_URL);
     }
-
+    
     // Khởi tạo cơ sở dữ liệu
-    public static void initDatabase() {
-        String sql = "CREATE TABLE IF NOT EXISTS users (" +
-                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                     "username TEXT NOT NULL UNIQUE, " +
-                     "password TEXT NOT NULL)";
+    public static void initDatabase(String sql) {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
             stmt.executeUpdate(sql);
@@ -24,6 +52,15 @@ public class DatabaseManager {
             System.err.println("[DB] Database initialization failed: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    public static void initAllDatabases() {
+    	//initDatabase("DROP TABLE users;");		//uncomment if you've already created 'users' table, leave commented otherwise
+    	initDatabase(sqlUsers);
+    	initDatabase(sqlGroupUsers);
+    	initDatabase(sqlGroups);
+    	initDatabase(sqlMsgToBeServed);
+    	//initDatabase(sqlMsgSent);
     }
 
     // Xác thực người dùng
@@ -84,4 +121,6 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
+    
+
 }
