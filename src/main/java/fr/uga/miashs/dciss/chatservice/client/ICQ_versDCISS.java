@@ -19,6 +19,7 @@ import javax.swing.border.EtchedBorder;
 import java.awt.Rectangle;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.awt.Color;
 import javax.swing.SwingConstants;
 import javax.swing.JScrollPane;
@@ -227,7 +228,11 @@ public class ICQ_versDCISS {
 		        int dest = Integer.parseInt(textArea_SendTO.getText().trim());//trim for deleting spaces at the beginning and at the end of the string
 		        String msg = textArea_yourmsg.getText();
 
-		        client.sendPacket(dest, msg.getBytes(StandardCharsets.UTF_8));
+				try {
+					client.sendPacket(dest, msg.getBytes(StandardCharsets.UTF_8));
+				} catch (IOException ioException) {
+					textArea_msgs.append("Failed to send message: " + ioException.getMessage() + "\n");
+				}
 
 		        // add message to the main area
 		        String affichage = "[Moi → " + dest + "] : " + msg + "\n";

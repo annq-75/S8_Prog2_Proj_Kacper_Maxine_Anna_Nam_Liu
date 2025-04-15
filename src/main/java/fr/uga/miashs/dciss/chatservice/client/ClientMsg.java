@@ -113,6 +113,7 @@ public class ClientMsg {
 	public void startSession() throws UnknownHostException {
 		if (s == null || s.isClosed()) {
 			try {
+				System.out.println("Attempting to connect to server...");
 				s = new Socket(serverAddress, serverPort);
 				dos = new DataOutputStream(s.getOutputStream());
 				dis = new DataInputStream(s.getInputStream());
@@ -121,13 +122,14 @@ public class ClientMsg {
 				if (identifier == 0) {
 					identifier = dis.readInt();
 				}
-				// start the receive loop
+				// Bắt đầu vòng lặp nhận tin nhắn
 				new Thread(() -> receiveLoop()).start();
 				notifyConnectionListeners(true);
+				System.out.println("Connection established successfully.");
 			} catch (IOException e) {
 				e.printStackTrace();
-				// error, close session
 				closeSession();
+				throw new IllegalStateException("Failed to establish connection to the server.");
 			}
 		}
 	}
@@ -139,6 +141,9 @@ public class ClientMsg {
 	 * @param data   the data to be sent
 	 */
 	public void sendPacket(int destId, byte[] data) throws IOException {
+		if (s == null || s.isClosed()) {
+			throw new IllegalStateException("Socket is not connected. Ensure the connection is established.");
+		}
 		if (dos == null) {
 			throw new IllegalStateException("DataOutputStream is not initialized. Ensure the connection is established.");
 		}
@@ -148,7 +153,6 @@ public class ClientMsg {
 			dos.write(data);
 			dos.flush();
 		}
-		
 	}
 
 
@@ -246,8 +250,13 @@ public class ClientMsg {
 	 */
 	public boolean register(String username, String password) {
 		try {
-			// Envoyer une requête d'enregistrement au serveur
-			sendPacket(1, (username + ":" + password).getBytes()); // Exemple : type de paquet 1 pour l'enregistrement
+			// Đảm bảo kết nối được thiết lập
+			if (s == null || s.isClosed()) {
+				startSession();
+			}
+	
+			// Gửi yêu cầu đăng ký
+			sendPacket(1, (username + ":" + password).getBytes()); // Loại gói 1 cho đăng ký
 			byte[] response = receivePacketFromServer();
 			String responseStr = new String(response);
 			return responseStr.equals("SUCCESS");
