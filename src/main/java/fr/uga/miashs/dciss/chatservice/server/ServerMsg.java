@@ -197,5 +197,30 @@ public class ServerMsg {
 	}
 
 	
+	//-------------------use for sendOnlineUsers- in servPackPr----------------------
+	/*public Object getUsers() {
+		// TODO Auto-generated method stub
+		return null;
+	}*/
+	
+	public Map<Integer, Boolean> getUsers() {
+	    Map<Integer, Boolean> users = new HashMap<>();
+	    try (Connection cnx = DriverManager.getConnection("jdbc:sqlite:sample.db")) {
+	        String query = "SELECT id, is_online FROM MsgUser";
+	        try (PreparedStatement stmt = cnx.prepareStatement(query);
+	             ResultSet rs = stmt.executeQuery()) {
+	            while (rs.next()) {
+	                int id = rs.getInt("id");
+	                boolean online = rs.getBoolean("is_online");
+	                users.put(id, online);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return users;
+	}
+
+	
 
 }
