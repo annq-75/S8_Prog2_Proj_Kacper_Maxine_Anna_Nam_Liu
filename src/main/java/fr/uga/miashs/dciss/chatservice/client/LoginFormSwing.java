@@ -2,6 +2,7 @@ package fr.uga.miashs.dciss.chatservice.client;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class LoginFormSwing {
 
@@ -180,9 +181,14 @@ public class LoginFormSwing {
         sendButton.addActionListener(e -> {
             String message = messageField.getText();
             if (!message.isEmpty()) {
-                client.sendPacket(0, message.getBytes());
-                chatArea.append("You: " + message + "\n");
-                messageField.setText("");
+                try {
+                    client.sendPacket(0, message.getBytes());
+                    chatArea.append("You: " + message + "\n");
+                    messageField.setText("");
+                } catch (IOException ex) {
+                    chatArea.append("Error sending message: " + ex.getMessage() + "\n");
+                    ex.printStackTrace();
+                }
             }
         });
 

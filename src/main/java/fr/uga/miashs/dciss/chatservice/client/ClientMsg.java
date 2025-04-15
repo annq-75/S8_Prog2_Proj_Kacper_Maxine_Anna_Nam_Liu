@@ -138,20 +138,19 @@ public class ClientMsg {
 	 * @param destId the destinatiion id
 	 * @param data   the data to be sent
 	 */
-	public void sendPacket(int destId, byte[] data) {
-		try {
-			synchronized (dos) {
-				dos.writeInt(destId);
-				dos.writeInt(data.length);
-				dos.write(data);
-				dos.flush();
-			}
-		} catch (IOException e) {
-			// error, connection closed
-			closeSession();
+	public void sendPacket(int destId, byte[] data) throws IOException {
+		if (dos == null) {
+			throw new IllegalStateException("DataOutputStream is not initialized. Ensure the connection is established.");
+		}
+		synchronized (dos) {
+			dos.writeInt(destId);
+			dos.writeInt(data.length);
+			dos.write(data);
+			dos.flush();
 		}
 		
 	}
+
 
 	/**
 	 * Start the receive loop. Has to be called only once.
