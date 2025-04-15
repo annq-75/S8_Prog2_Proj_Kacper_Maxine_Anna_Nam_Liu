@@ -29,316 +29,395 @@ import fr.uga.miashs.dciss.chatservice.common.Packet;
  */
 public class ClientMsg {
 
-	private String serverAddress;
-	private int serverPort;
+    private String serverAddress;
+    private int serverPort;
 
-	private Socket s;
-	private DataOutputStream dos;
-	private DataInputStream dis;
+    private Socket s;
+    private DataOutputStream dos;
+    private DataInputStream dis;
 
-	private int identifier;
+    private int identifier;
 
-	private List<MessageListener> mListeners;
-	private List<ConnectionListener> cListeners;
+    private List<MessageListener> mListeners;
+    private List<ConnectionListener> cListeners;
 
-	/**
-	 * Create a client with an existing id, that will connect to the server at the
-	 * given address and port
-	 * 
-	 * @param id      The client id
-	 * @param address The server address or hostname
-	 * @param port    The port number
-	 */
-	public ClientMsg(int id, String address, int port) {
-		if (id < 0)
-			throw new IllegalArgumentException("id must not be less than 0");
-		if (port <= 0)
-			throw new IllegalArgumentException("Server port must be greater than 0");
-		serverAddress = address;
-		serverPort = port;
-		identifier = id;
-		mListeners = new ArrayList<>();
-		cListeners = new ArrayList<>();
-	}
+    /**
+     * Create a client with an existing id, that will connect to the server at the
+     * given address and port
+     *
+     * @param id      The client id
+     * @param address The server address or hostname
+     * @param port    The port number
+     */
+    public ClientMsg(int id, String address, int port) {
+        if (id < 0)
+            throw new IllegalArgumentException("id must not be less than 0");
+        if (port <= 0)
+            throw new IllegalArgumentException("Server port must be greater than 0");
+        serverAddress = address;
+        serverPort = port;
+        identifier = id;
+        mListeners = new ArrayList<>();
+        cListeners = new ArrayList<>();
+    }
 
-	/**
-	 * Create a client without id, the server will provide an id during the the
-	 * session start
-	 * 
-	 * @param address The server address or hostname
-	 * @param port    The port number
-	 */
-	public ClientMsg(String address, int port) {
-		this(0, address, port);
-	}
+    /**
+     * Create a client without id, the server will provide an id during the the
+     * session start
+     *
+     * @param address The server address or hostname
+     * @param port    The port number
+     */
+    public ClientMsg(String address, int port) {
+        this(0, address, port);
+    }
 
-	/**
-	 * Register a MessageListener to the client. It will be notified each time a
-	 * message is received.
-	 * 
-	 * @param l
-	 */
-	public void addMessageListener(MessageListener l) {
-		if (l != null)
-			mListeners.add(l);
-	}
-	protected void notifyMessageListeners(Packet p) {
-		mListeners.forEach(x -> x.messageReceived(p));
-	}
-	
-	/**
-	 * Register a ConnectionListener to the client. It will be notified if the connection  start or ends.
-	 * 
-	 * @param l
-	 */
-	public void addConnectionListener(ConnectionListener l) {
-		if (l != null)
-			cListeners.add(l);
-	}
-	protected void notifyConnectionListeners(boolean active) {
-		cListeners.forEach(x -> x.connectionEvent(active));
-	}
+    /**
+     * Register a MessageListener to the client. It will be notified each time a
+     * message is received.
+     *
+     * @param l
+     */
+    public void addMessageListener(MessageListener l) {
+        if (l != null)
+            mListeners.add(l);
+    }
+    protected void notifyMessageListeners(Packet p) {
+        mListeners.forEach(x -> x.messageReceived(p));
+    }
+    
+    /**
+     * Register a ConnectionListener to the client. It will be notified if the connection  start or ends.
+     *
+     * @param l
+     */
+    public void addConnectionListener(ConnectionListener l) {
+        if (l != null)
+            cListeners.add(l);
+    }
+    protected void notifyConnectionListeners(boolean active) {
+        cListeners.forEach(x -> x.connectionEvent(active));
+    }
 
 
-	public int getIdentifier() {
-		return identifier;
-	}
+    public int getIdentifier() {
+        return identifier;
+    }
 
-	/**
-	 * Method to be called to establish the connection.
-	 * 
-	 * @throws UnknownHostException
-	 * @throws IOException
-	 */
-	public void startSession() throws UnknownHostException {
-		if (s == null || s.isClosed()) {
-			try {
-				s = new Socket(serverAddress, serverPort);
-				dos = new DataOutputStream(s.getOutputStream());
-				dis = new DataInputStream(s.getInputStream());
-				dos.writeInt(identifier);
-				dos.flush();
-				if (identifier == 0) {
-					identifier = dis.readInt();
-				}
-				// start the receive loop
-				new Thread(() -> receiveLoop()).start();
-				notifyConnectionListeners(true);
-			} catch (IOException e) {
-				e.printStackTrace();
-				// error, close session
-				closeSession();
-			}
-		}
-	}
+    /**
+     * Method to be called to establish the connection.
+     *
+     * @throws UnknownHostException
+     * @throws IOException
+     */
+    public void startSession() throws UnknownHostException {
+        if (s == null || s.isClosed()) {
+            try {
+                s = new Socket(serverAddress, serverPort);
+                dos = new DataOutputStream(s.getOutputStream());
+                dis = new DataInputStream(s.getInputStream());
+                dos.writeInt(identifier);
+                dos.flush();
+                if (identifier == 0) {
+                    identifier = dis.readInt();
+                }
+                // start the receive loop
+                new Thread(() -> receiveLoop()).start();
+                notifyConnectionListeners(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+                // error, close session
+                closeSession();
+            }
+        }
+    }
 
-	/**
-	 * Send a packet to the specified destination (etiher a userId or groupId)
-	 * 
-	 * @param destId the destinatiion id
-	 * @param data   the data to be sent
-	 */
-	public void sendPacket(int destId, byte[] data) {
-		try {
-			synchronized (dos) {
-				dos.writeInt(destId);
-				dos.writeInt(data.length);
-				dos.write(data);
-				dos.flush();
-			}
-		} catch (IOException e) {
-			// error, connection closed
-			closeSession();
-		}
-		
-	}
+    /**
+     * Send a packet to the specified destination (etiher a userId or groupId)
+     *
+     * @param destId the destinatiion id
+     * @param data   the data to be sent
+     */
+    public void sendPacket(int destId, byte[] data) {
+        try {
+            synchronized (dos) {
+                dos.writeInt(destId);
+                dos.writeInt(data.length);
+                dos.write(data);
+                dos.flush();
+            }
+        } catch (IOException e) {
+            // error, connection closed
+            closeSession();
+        }
+        
+    }
 
-	/**
-	 * Start the receive loop. Has to be called only once.
-	 */
-	private void receiveLoop() {
-		try {
-			while (s != null && !s.isClosed()) {
+    /**
+     * Start the receive loop. Has to be called only once.
+     */
+    private void receiveLoop() {
+        try {
+            while (s != null && !s.isClosed()) {
 
-				int sender = dis.readInt();
-				int dest = dis.readInt();
-				int length = dis.readInt();
-				byte[] data = new byte[length];
-				dis.readFully(data);
-				notifyMessageListeners(new Packet(sender, dest, data));
+                int sender = dis.readInt();
+                int dest = dis.readInt();
+                int length = dis.readInt();
+                byte[] data = new byte[length];
+                dis.readFully(data);
+                notifyMessageListeners(new Packet(sender, dest, data));
 
-			}
-		} catch (IOException e) {
-			// error, connection closed
-		}
-		closeSession();
-	}
+            }
+        } catch (IOException e) {
+            // error, connection closed
+        }
+        closeSession();
+    }
 
-	public void closeSession() {
-		try {
-			if (s != null)
-				s.close();
-		} catch (IOException e) {
-		}
-		s = null;
-		notifyConnectionListeners(false);
-	}
+    public void closeSession() {
+        try {
+            if (s != null)
+                s.close();
+        } catch (IOException e) {
+        }
+        s = null;
+        notifyConnectionListeners(false);
+    }
 
-	// Envoyer les informations de connexion au serveur
+    //=============================================Ajout manuellement============================================================
+        //Ajout un menu pour demander au user s'il veux créer un groupe
+        public void handleUserInteraction() {
+            Scanner sc = new Scanner(System.in);
+            String input = "";
 
-	/**
-	 * Se connecte au serveur avec un nom d'utilisateur et un mot de passe.
-	 * 
-	 * @param serverAddress L'adresse du serveur
-	 * @param serverPort    Le port du serveur
-	 * @param username      Le nom d'utilisateur
-	 * @param password      Le mot de passe
-	 * @return true si la connexion est réussie, sinon false
-	 */
-	public boolean connectToServer(String serverAddress, int serverPort, String username, String password) {
-		try {
-			// Établir une connexion avec le serveur
-			s = new Socket(serverAddress, serverPort);
-			dis = new DataInputStream(s.getInputStream());
-			dos = new DataOutputStream(s.getOutputStream());
+            while (true) {
+                System.out.println("\nQue voulez-vous faire ?");
+                System.out.println("1. Envoyer un message");
+                System.out.println("2. Créer un groupe");
+                System.out.println("3. Quitter");
+                System.out.print("Votre choix: ");
+                input = sc.nextLine();
 
-			// Envoyer les informations de connexion
-			dos.writeUTF(username);
-			dos.writeUTF(password);
-			dos.flush();
+                switch (input) {
+                    case "1":
+                        handleSendMessage(sc);
+                        break;
+                    case "2":
+                        handleCreateGroup(sc);
+                        break;
+                    case "3":
+                        closeSession();
+                        return;
+                    default:
+                        System.out.println("Choix invalide !");
+                }
+            }
+        }
+        
+        private void handleSendMessage(Scanner sc) {
+            try {
+                System.out.print("ID du destinataire (Utilisateur positif / Groupe négatif) : ");
+                int destId = Integer.parseInt(sc.nextLine());
 
-			// Recevoir la réponse du serveur
-			int userId = dis.readInt();
-			if (userId == -1) {
-				System.out.println("Échec de la connexion ! Vérifiez le nom d'utilisateur ou le mot de passe.");
-				s.close();
-				return false; // Connexion échouée
-			} else {
-				System.out.println("Connexion réussie ! ID utilisateur : " + userId);
-				// Continuer le traitement après une connexion réussie
-				startMessaging();
-				return true; // Connexion réussie
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false; // Erreur de connexion
-		}
-	}
+                System.out.print("Votre message : ");
+                String message = sc.nextLine();
 
-	/**
-	 * Vérifie si les informations d'authentification sont valides.
-	 * 
-	 * @param username Le nom d'utilisateur
-	 * @param password Le mot de passe
-	 * @return true si les informations sont valides, sinon false
-	 */
-	public boolean isAuthenticated(String username, String password) {
-		// Implémenter la logique d'authentification ici
-		// Retourne true si le nom d'utilisateur et le mot de passe sont valides
-		return "validUser".equals(username) && "validPass".equals(password);
-	}
+                sendPacket(destId, message.getBytes());  // 复用sendPacket
+                System.out.println("Message envoyé à " + destId);
 
-	/**
-	 * Enregistre un nouvel utilisateur sur le serveur.
-	 * 
-	 * @param username Le nom d'utilisateur
-	 * @param password Le mot de passe
-	 * @return true si l'enregistrement est réussi, sinon false
-	 */
-	public boolean register(String username, String password) {
-		try {
-			// Envoyer une requête d'enregistrement au serveur
-			sendPacket(1, (username + ":" + password).getBytes()); // Exemple : type de paquet 1 pour l'enregistrement
-			byte[] response = receivePacketFromServer();
-			String responseStr = new String(response);
-			return responseStr.equals("SUCCESS");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+            } catch (NumberFormatException e) {
+                System.out.println("Identifiant invalide !");
+            }
+        }
+        
+        private void handleCreateGroup(Scanner sc) {
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                DataOutputStream dos = new DataOutputStream(bos);
 
-	/**
-	 * Reçoit un paquet du serveur.
-	 * 
-	 * @return le tableau d'octets reçu
-	 * @throws IOException si une erreur d'E/S se produit
-	 */
-	private byte[] receivePacketFromServer() throws IOException {
-		int length = dis.readInt();
-		byte[] data = new byte[length];
-		dis.readFully(data);
-		return data;
-	}
+                dos.writeByte(1);  // 操作码1：创建群组
 
-	
+                System.out.print("Combien de membres voulez-vous ajouter ? ");
+                int nbMembers = Integer.parseInt(sc.nextLine());
+                dos.writeInt(nbMembers);
 
-	private void startMessaging() {
-		// Logique pour envoyer et recevoir des messages après une connexion réussie
-		System.out.println("Commencer à envoyer et recevoir des messages...");
-	}
+                for (int i = 0; i < nbMembers; i++) {
+                    System.out.print("ID du membre " + (i + 1) + " : ");
+                    int memberId = Integer.parseInt(sc.nextLine());
+                    dos.writeInt(memberId);
+                }
 
-	public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {
-		ClientMsg c = new ClientMsg("localhost", 1666);
+                dos.flush();
+                sendPacket(0, bos.toByteArray());  // 0 = 发给服务器，要求创建群组
+                System.out.println("Demande de création de groupe envoyée au serveur.");
 
-		// add a dummy listener that print the content of message as a string
-		c.addMessageListener(p -> System.out.println(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
-		
-		// add a connection listener that exit application when connection closed
-		c.addConnectionListener(active ->  {if (!active) System.exit(0);});
+            } catch (Exception e) {
+                System.out.println("Erreur lors de la création du groupe : " + e.getMessage());
+            }
+        }
+    
+        
+    //================================partie Namdo================================================
+        
+        // Envoyer les informations de connexion au serveur
 
-		c.startSession();
-		System.out.println("Vous êtes : " + c.getIdentifier());
+        /**
+         * Se connecte au serveur avec un nom d'utilisateur et un mot de passe.
+         *
+         * @param serverAddress L'adresse du serveur
+         * @param serverPort    Le port du serveur
+         * @param username      Le nom d'utilisateur
+         * @param password      Le mot de passe
+         * @return true si la connexion est réussie, sinon false
+         */
+        public boolean connectToServer(String serverAddress, int serverPort, String username, String password) {
+            try {
+                // Établir une connexion avec le serveur
+                s = new Socket(serverAddress, serverPort);
+                dis = new DataInputStream(s.getInputStream());
+                dos = new DataOutputStream(s.getOutputStream());
 
-		// Thread.sleep(5000);
+                // Envoyer les informations de connexion
+                dos.writeUTF(username);
+                dos.writeUTF(password);
+                dos.flush();
 
-		// l'utilisateur avec id 4 crée un grp avec 1 et 3 dedans (et lui meme)
-		if (c.getIdentifier() == 4) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			DataOutputStream dos = new DataOutputStream(bos);
+                // Recevoir la réponse du serveur
+                int userId = dis.readInt();
+                if (userId == -1) {
+                    System.out.println("Échec de la connexion ! Vérifiez le nom d'utilisateur ou le mot de passe.");
+                    s.close();
+                    return false; // Connexion échouée
+                } else {
+                    System.out.println("Connexion réussie ! ID utilisateur : " + userId);
+                    // Continuer le traitement après une connexion réussie
+                    startMessaging();
+                    return true; // Connexion réussie
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false; // Erreur de connexion
+            }
+        }
 
-			// byte 1 : create group on server
-			dos.writeByte(1);
+        /**
+         * Vérifie si les informations d'authentification sont valides.
+         *
+         * @param username Le nom d'utilisateur
+         * @param password Le mot de passe
+         * @return true si les informations sont valides, sinon false
+         */
+        public boolean isAuthenticated(String username, String password) {
+            // Implémenter la logique d'authentification ici
+            // Retourne true si le nom d'utilisateur et le mot de passe sont valides
+            return "validUser".equals(username) && "validPass".equals(password);
+        }
 
-			// nb members
-			dos.writeInt(2);
-			// list members
-			dos.writeInt(1);
-			dos.writeInt(3);
-			dos.flush();
+        /**
+         * Enregistre un nouvel utilisateur sur le serveur.
+         *
+         * @param username Le nom d'utilisateur
+         * @param password Le mot de passe
+         * @return true si l'enregistrement est réussi, sinon false
+         */
+        public boolean register(String username, String password) {
+            try {
+                // Envoyer une requête d'enregistrement au serveur
+                sendPacket(1, (username + ":" + password).getBytes()); // Exemple : type de paquet 1 pour l'enregistrement
+                byte[] response = receivePacketFromServer();
+                String responseStr = new String(response);
+                return responseStr.equals("SUCCESS");
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
 
-			c.sendPacket(0, bos.toByteArray());
+        /**
+         * Reçoit un paquet du serveur.
+         *
+         * @return le tableau d'octets reçu
+         * @throws IOException si une erreur d'E/S se produit
+         */
+        private byte[] receivePacketFromServer() throws IOException {
+            int length = dis.readInt();
+            byte[] data = new byte[length];
+            dis.readFully(data);
+            return data;
+        }
 
-		}
-		
-		
+        
 
-		Scanner sc = new Scanner(System.in);
-		String lu = null;
-		while (!"\\quit".equals(lu)) {
-			try {
-				System.out.println("A qui voulez vous écrire ? ");
-				int dest = Integer.parseInt(sc.nextLine());
+        private void startMessaging() {
+            // Logique pour envoyer et recevoir des messages après une connexion réussie
+            System.out.println("Commencer à envoyer et recevoir des messages...");
+        }
+        
+        //================================================================================================
 
-				System.out.println("Votre message ? ");
-				lu = sc.nextLine();
-				c.sendPacket(dest, lu.getBytes());
-			} catch (InputMismatchException | NumberFormatException e) {
-				System.out.println("Mauvais format");
-			}
+        public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {
+            ClientMsg c = new ClientMsg("localhost", 1666);
 
-		}
+            // add a dummy listener that print the content of message as a string
+            c.addMessageListener(p -> System.out.println(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
+            
+            // add a connection listener that exit application when connection closed
+            c.addConnectionListener(active ->  {if (!active) System.exit(0);});
 
-		/*
-		 * int id =1+(c.getIdentifier()-1) % 2; System.out.println("send to "+id);
-		 * c.sendPacket(id, "bonjour".getBytes());
-		 * 
-		 * 
-		 * Thread.sleep(10000);
-		 */
+            c.startSession();
+            System.out.println("Vous êtes : " + c.getIdentifier());
+            
+            c.handleUserInteraction();
+            // Thread.sleep(5000);
 
-		c.closeSession();
+            // l'utilisateur avec id 4 crée un grp avec 1 et 3 dedans (et lui meme)
+//            if (c.getIdentifier() == 4) {
+//                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//                DataOutputStream dos = new DataOutputStream(bos);
+    //
+//                // byte 1 : create group on server
+//                dos.writeByte(1);
+    //
+//                // nb members
+//                dos.writeInt(2);
+//                // list members
+//                dos.writeInt(1);
+//                dos.writeInt(3);
+//                dos.flush();
+    //
+//                c.sendPacket(0, bos.toByteArray());
+    //
+//            }
+            
+            
 
-	}
+            Scanner sc = new Scanner(System.in);
+            String lu = null;
+            while (!"\\quit".equals(lu)) {
+                try {
+                    System.out.println("A qui voulez vous écrire ? ");
+                    int dest = Integer.parseInt(sc.nextLine());
+
+                    System.out.println("Votre message ? ");
+                    lu = sc.nextLine();
+                    c.sendPacket(dest, lu.getBytes());
+                } catch (InputMismatchException | NumberFormatException e) {
+                    System.out.println("Mauvais format");
+                }
+
+            }
+
+            /*
+             * int id =1+(c.getIdentifier()-1) % 2; System.out.println("send to "+id);
+             * c.sendPacket(id, "bonjour".getBytes());
+             *
+             *
+             * Thread.sleep(10000);
+             */
+
+            c.closeSession();
+
+        }
+
 
 }
