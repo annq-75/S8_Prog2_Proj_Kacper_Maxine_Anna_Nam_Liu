@@ -11,8 +11,6 @@
 
 package fr.uga.miashs.dciss.chatservice.common;
 
-import java.nio.ByteBuffer;
-
 /*
  * Data structure to represent a packet
  */
@@ -21,14 +19,13 @@ public class Packet {
 	public final int srcId;
 	public final int destId;
 	public final byte[] data;
-
+	
 	public Packet(int srcId, int destId, byte[] data) {
 		super();
 		this.srcId = srcId;
 		this.destId = destId;
 		this.data = data;
 	}
-
 	
 	
 }

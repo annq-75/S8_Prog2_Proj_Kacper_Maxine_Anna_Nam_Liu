@@ -40,11 +40,11 @@ nom du groupe: Taille variable
 - supression d'un groupe -> 2
 nom du groupe : taille variable
 - ajout d'utilisateurs -> 3
-id utilisateur : 1 octet (0 si on ne le connait pas??)
-nom d'utilisateur: taille variable (0 si on le connait pas??)
+id utilisateur : 1 octet (0 si on ne le connait pas)
+nom d'utilisateur: taille variable (0 si on le connait pas)
 - supression d'utilisateurs -> 4
-id utilisateur : 1 octet (0 si on ne le connait pas??)
-nom d'utilisateur: taille variable (0 si on le connait pas??)
+id utilisateur : 1 octet (0 si on ne le connait pas)
+nom d'utilisateur: taille variable (0 si on le connait pas)
 - envoie de message -> 5
 id utilisateur/groupe : 1 octet
 contenu : taille variable
@@ -61,14 +61,14 @@ DATA:
 Types d'action et données de l'action:
 - Envoie d'erreur -> 1
 message d'erreur : taille variable (la variation provient de type d'erreur enregistré )
-- Demande de confirmation (???) -> 2
+- Demande de confirmation -> 2
 - Envoie de message stocké -> 3
 - 
 
 #### Des paquetages en plus pour communiquer avec la base de données :
 
 
-**- du client vers la base de donnée** (pas sur de cette partie, est-ce qu'il y a vraiment un lient avec ce qu'on fait?)
+**- du client vers la base de donnée** 
 
 id expéditeur | id destinataire | longueur des données(en octets) | les donnees (data)
 4 octets (int) | 4 octets (int) | 4 octets (int) | taille variable dont le nb d'octets a été donné juste avant
@@ -87,25 +87,5 @@ Types d'action et données de l'action:
 - Stockage de message envoyé (non reçu) -> 1
 message : taille variable
 
-Paquetages en plus pour que la BDD puisse communiquer avec le serveur ou le client??? redondance???
 
-**- de la base de données vers le serveur????**
-dans le but d'informer periodicalement le serveur??? ex: 
-
-
-Liste de paquetages: index | Data (en octets ou taille variable)
-
-- Création d'un groupe -> 1 | nombre de membres (1); nom du groupe
-- suppression -> 2 | nom groupe
-- ajout utilisateurs -> 3 | id/nom utilisateurs ; nom groupe
-- suppression utilisateurs -> 4 | nom utilisateur
-- envoie de message -> 5 | id util/grope; contenu
-- suppression de groupe -> 6 | nom du groupe
-
-- envoie d'erreur -> 7 | message d'erreur
-- envoie de message stocké -> 8 | message
-
-
-- enregistrement de l'historique de mesages -> 9 | les messages enregistrés sur la session
-- stockage de message(s) envoyé(s) (non reçus) -> 10
 

@@ -111,37 +111,6 @@ public class ServerMsg {
 
 				DataInputStream dis = new DataInputStream(s.getInputStream());
 				DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-			
-				// logique de vérification de l'utilisateur
-				// Lire les informations de connexion du client
-				String username = dis.readUTF();
-				String password = dis.readUTF();
-	
-				// Vérification de l'utilisateur
-				if (DatabaseManager.validateUser(username, password)) {
-					// Connexion réussie
-					int userId = nextUserId.getAndIncrement();
-					dos.writeInt(userId); // Envoyer userId au client
-					dos.flush();
-	
-					// Créer UserMsg et l'ajouter à la liste des utilisateurs
-					UserMsg user = new UserMsg(userId, this);
-					users.put(userId, user);
-	
-					// Connexion réussie, commencer à recevoir et envoyer des données
-					if (user.open(s)) {
-						LOG.info("Utilisateur " + username + " (ID : " + userId + ") connecté");
-						executor.submit(() -> user.receiveLoop());
-						executor.submit(() -> user.sendLoop());
-					} else {
-						s.close();
-					}
-				} else {
-					// Échec de la connexion
-					dos.writeInt(-1); // Envoyer un code d'erreur au client
-					dos.flush();
-					s.close();
-				}
 
 				// lit l'identifiant du client
 				int userId = dis.readInt();
@@ -188,39 +157,8 @@ public class ServerMsg {
 	}
 
 	public static void main(String[] args) throws IOException {
-		// Initialize the database
-		DatabaseManager.initAllDatabases();
-		DatabaseManager.insertTestUser();
 		ServerMsg s = new ServerMsg(1666);
 		s.start();
-
 	}
-
-	
-	//-------------------use for sendOnlineUsers- in servPackPr----------------------
-	/*public Object getUsers() {
-		// TODO Auto-generated method stub
-		return null;
-	}*/
-	
-	public Map<Integer, Boolean> getUsers() {
-	    Map<Integer, Boolean> users = new HashMap<>();
-	    try (Connection cnx = DriverManager.getConnection("jdbc:sqlite:sample.db")) {
-	        String query = "SELECT id, is_online FROM MsgUser";
-	        try (PreparedStatement stmt = cnx.prepareStatement(query);
-	             ResultSet rs = stmt.executeQuery()) {
-	            while (rs.next()) {
-	                int id = rs.getInt("id");
-	                boolean online = rs.getBoolean("is_online");
-	                users.put(id, online);
-	            }
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return users;
-	}
-
-	
 
 }
