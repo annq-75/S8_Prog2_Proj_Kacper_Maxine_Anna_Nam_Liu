@@ -13,7 +13,6 @@ package fr.uga.miashs.dciss.chatservice.server;
 import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.*;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
 import fr.uga.miashs.dciss.chatservice.common.Packet;
@@ -113,6 +112,11 @@ public class UserMsg implements PacketProcessor{
 			LOG.warning("Connection with client "+userId+" is broken...close it.");
 		}
 		close();
+	}
+
+	public void sendPacket(int destId, byte[] data) {
+    Packet packet = new Packet(this.userId, destId, data);
+    process(packet); // Thêm packet vào hàng đợi gửi
 	}
 	
 	// boucle d'envoi

@@ -11,6 +11,9 @@
 
 package fr.uga.miashs.dciss.chatservice.server;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
@@ -26,18 +29,29 @@ public class ServerPacketProcessor implements PacketProcessor {
 
 	@Override
 	public void process(Packet p) {
-		// ByteBufferVersion. On aurait pu utiliser un ByteArrayInputStream + DataInputStream à la place
 		ByteBuffer buf = ByteBuffer.wrap(p.data);
 		byte type = buf.get();
 		
-		if (type == 1) { // cas creation de groupe
-			createGroup(p.srcId,buf);
-		} else {
-			LOG.warning("Server message of type=" + type + " not handled by procesor");
+		switch (type) {
+			case 1:
+				createGroup(p.srcId, buf);
+				break;
+			case 7:
+				handleLogin(p.srcId, buf);
+				break;
+			case 8:
+				handleRegister(p.srcId, buf);
+				break;
+			// case 9:
+			// 	handleLogout(p.srcId, buf);
+			// 	break;
+			default:
+				LOG.warning("Unhandled message type: " + type);
+				break;
 		}
 	}
 	
-	public void createGroup(int ownerId, ByteBuffer data) {
+	private void createGroup(int ownerId, ByteBuffer data) {
 		int nb = data.getInt();
 		GroupMsg g = server.createGroup(ownerId);
 		for (int i = 0; i < nb; i++) {
@@ -45,4 +59,53 @@ public class ServerPacketProcessor implements PacketProcessor {
 		}
 	}
 
+	private void handleLogin(int userId, ByteBuffer data) {
+		String username = readString(data);
+		String password = readString(data);
+		if (server.loginUser(username, password)) {
+			LOG.info("User " + username + " logged in.");
+		} else {
+			LOG.warning("Login failed for user " + username);
+		}
+	}
+
+	private void handleRegister(int userId, ByteBuffer data) {
+    String username = readString(data);
+    String password = readString(data);
+    boolean isSuccess = server.registerUser(username, password);
+    
+    // Gửi phản hồi về client
+    try {
+        UserMsg user = server.getUser(userId);
+        if (user != null) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(bos);
+            dos.writeUTF(isSuccess ? "SUCCESS" : "FAIL");
+            user.sendPacket(0, bos.toByteArray()); // Gửi đến client với destId = 0
+        }
+    } catch (IOException e) {
+        LOG.severe("Failed to send registration response: " + e.getMessage());
+    }
+
+    if (isSuccess) {
+        LOG.info("User " + username + " registered.");
+    } else {
+        LOG.warning("Registration failed for user " + username);
+    }
+}
+
+	// private void handleLogout(int userId, ByteBuffer data) {
+	// 	if (server.logoutUser(userId)) {
+	// 		LOG.info("User ID " + userId + " logged out.");
+	// 	} else {
+	// 		LOG.warning("Logout failed for user ID " + userId);
+	// 	}
+	// }
+
+	private String readString(ByteBuffer data) {
+		int length = data.getInt();
+		byte[] bytes = new byte[length];
+		data.get(bytes);
+		return new String(bytes);
+	}
 }

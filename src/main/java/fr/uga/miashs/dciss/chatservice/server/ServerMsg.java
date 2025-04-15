@@ -13,6 +13,7 @@ package fr.uga.miashs.dciss.chatservice.server;
 
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -75,11 +76,41 @@ public class ServerMsg {
 		u.beforeDelete();
 		return true;
 	}
-	
+	///// Méthodes de gestion des utilisateurs simplifiées /////
+
+	// Méthode pour connecter un utilisateur
+	public boolean loginUser(String username, String password) {
+		if (DatabaseManager.validateUser(username, password)) {
+			LOG.info("User " + username + " logged in successfully.");
+			return true;
+		} else {
+			LOG.warning("Invalid login credentials for username: " + username);
+			return false;
+		}
+	}
+
+	// Méthode pour enregistrer un utilisateur
+	public boolean registerUser(String username, String password) {
+		if (DatabaseManager.userExists(username)) {
+			LOG.warning("Registration failed: Username " + username + " already exists.");
+			return false;
+		}
+
+		boolean success = DatabaseManager.addUser(username, password);
+		if (success) {
+			LOG.info("User " + username + " registered successfully.");
+			return true;
+		} else {
+			LOG.warning("Registration failed for username: " + username);
+			return false;
+		}
+	}
+
+	////////////////////////////
+		
 	public UserMsg getUser(int userId) {
 		return users.get(userId);
 	}
-	
 	// Methode utilisée pour savoir quoi faire d'un paquet
 	// reçu par le serveur
 	public void processPacket(Packet p) {

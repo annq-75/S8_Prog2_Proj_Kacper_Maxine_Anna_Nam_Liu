@@ -69,6 +69,44 @@ public class DatabaseManager {
         return validateUser(username, password);
     }
 
+
+        // Kiểm tra xem người dùng đã tồn tại chưa
+    public static boolean userExists(String username) {
+        String query = "SELECT 1 FROM users WHERE username = ?";
+        try (Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, username);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                boolean exists = rs.next();
+                System.out.println("[DB] Vérification de l'existence de l'utilisateur '" + username + "' : " + exists);
+                return exists;
+            }
+        } catch (SQLException e) {
+            System.err.println("[DB] Échec de la vérification de l'existence de l'utilisateur : " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Thêm người dùng mới
+    public static boolean addUser(String username, String password) {
+        String sql = "INSERT INTO users(username, password) VALUES(?, ?)";
+        try (Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            stmt.setString(2, password); // Vous pouvez hacher le mot de passe ici
+            stmt.executeUpdate();
+            System.out.println("[DB] Utilisateur ajouté : " + username);
+            return true;
+        } catch (SQLException e) {
+            System.err.println("[DB] Échec de l'ajout de l'utilisateur '" + username + "' : " + e.getMessage());
+            return false;
+        }
+    }
+
     // Ajouter un compte de test
     public static void insertTestUser() {
         String sql = "INSERT OR IGNORE INTO users(username, password) VALUES (?, ?)";
