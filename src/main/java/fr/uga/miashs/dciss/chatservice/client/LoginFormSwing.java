@@ -151,7 +151,7 @@ public class LoginFormSwing {
         }
 
         // Gọi ClientMsg để gửi yêu cầu đăng ký đến server
-        ClientMsg client = new ClientMsg("localhost", 1666);
+        ClientMsg client = new ClientMsg("localhost", 1666,);
         try {
             boolean registerSuccess = client.register(username, password);
             if (registerSuccess) {
