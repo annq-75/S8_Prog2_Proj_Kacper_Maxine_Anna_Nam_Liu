@@ -189,7 +189,7 @@ public class ServerMsg {
 
 	public static void main(String[] args) throws IOException {
 		// Initialize the database
-		DatabaseManager.initDatabase();
+		DatabaseManager.initAllDatabases();
 		DatabaseManager.insertTestUser();
 		ServerMsg s = new ServerMsg(1666);
 		s.start();

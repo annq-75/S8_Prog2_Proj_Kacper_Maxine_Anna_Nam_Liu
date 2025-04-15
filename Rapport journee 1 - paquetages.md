@@ -93,12 +93,19 @@ Paquetages en plus pour que la BDD puisse communiquer avec le serveur ou le clie
 dans le but d'informer periodicalement le serveur??? ex: 
 
 
+Liste de paquetages: index | Data (en octets ou taille variable)
+
+- Création d'un groupe -> 1 | nombre de membres (1); nom du groupe
+- suppression -> 2 | nom groupe
+- ajout utilisateurs -> 3 | id/nom utilisateurs ; nom groupe
+- suppression utilisateurs -> 4 | nom utilisateur
+- envoie de message -> 5 | id util/grope; contenu
+- suppression de groupe -> 6 | nom du groupe
+
+- envoie d'erreur -> 7 | message d'erreur
+- envoie de message stocké -> 8 | message
 
 
+- enregistrement de l'historique de mesages -> 9 | les messages enregistrés sur la session
+- stockage de message(s) envoyé(s) (non reçus) -> 10
 
-
-
-
-> Vous devez avoir spécifié le protocole, i.e. les formats de messages que vous avez défini pour implémenter les fonctionnalités. 
-Par exemple, paquet de création de groupe commence par la valeur 1 (byte indiquant le type de message serveur), puis nombre de membres (int), puis liste des identifiants des mmembres (ints). 
-Expliquer un peu votre politique de gestion de projet (comment et où sont répertoriées les taches et leur affectation), etc.
