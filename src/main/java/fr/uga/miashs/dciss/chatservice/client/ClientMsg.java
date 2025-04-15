@@ -59,7 +59,8 @@ public class ClientMsg {
 		identifier = id;
 		mListeners = new ArrayList<>();
 		cListeners = new ArrayList<>();
-	}
+		}
+	
 
 	/**
 	 * Create a client without id, the server will provide an id during the the
@@ -146,11 +147,8 @@ public class ClientMsg {
 	 * @param data   the data to be sent
 	 */
 
-	 // không nên gọi lại startSession nếu socket đã được kết nối
 	public void sendPacket(int destId, byte[] data) throws IOException {
-		if (s == null || s.isClosed()) {
-			throw new IllegalStateException("Socket is not connected. Ensure the connection is established.");
-		}
+		ensureConnection(); // Đảm bảo kết nối trước khi gửi
 		if (dos == null) {
 			throw new IllegalStateException("DataOutputStream is not initialized. Ensure the connection is established.");
 		}
@@ -197,196 +195,76 @@ public class ClientMsg {
 
 	/////////////////////// Envoyer les informations de connexion au serveur
 
-	/**
-	 * Se connecte au serveur avec un nom d'utilisateur et un mot de passe.
-	 * 
-	 * @param serverAddress L'adresse du serveur
-	 * @param serverPort    Le port du serveur
-	 * @param username      Le nom d'utilisateur
-	 * @param password      Le mot de passe
-	 * @return true si la connexion est réussie, sinon false
-	 */
-	public boolean connectToServer(String serverAddress, int serverPort, String username, String password) throws IOException {
-		ensureConnection(); // Assurer que la connexion est établie
-		try {
-			// Établir une connexion avec le serveur
-			s = new Socket(serverAddress, serverPort);
-			dis = new DataInputStream(s.getInputStream());
-			dos = new DataOutputStream(s.getOutputStream());
+	public boolean handleLogin(String username, String password) {
+		try (Socket socket = new Socket(serverAddress, serverPort)) {
+			DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+			DataInputStream dis = new DataInputStream(socket.getInputStream());
 
-			// Envoyer les informations de connexion
-			dos.writeUTF(username);
-			dos.writeUTF(password);
-			dos.flush();
+			dos.writeUTF("login:" + username + ":" + password);
+			String response = dis.readUTF();
 
-			// Recevoir la réponse du serveur
-			int userId = dis.readInt();
-			if (userId == -1) {
-				System.out.println("Échec de la connexion ! Vérifiez le nom d'utilisateur ou le mot de passe.");
-				s.close();
-				return false; // Connexion échouée
-			} else {
-				System.out.println("Connexion réussie ! ID utilisateur : " + userId);
-				// Continuer le traitement après une connexion réussie
-				startMessaging();
-				return true; // Connexion réussie
-			}
+			return "login_success".equals(response);
 		} catch (IOException e) {
-			e.printStackTrace();
-			return false; // Erreur de connexion
-		}
-	}
-
-	/**
-	 * Vérifie si les informations d'authentification sont valides.
-	 * 
-	 * @param username Le nom d'utilisateur
-	 * @param password Le mot de passe
-	 * @return true si les informations sont valides, sinon false
-	 */
-	public boolean isAuthenticated(String username, String password) {
-		// Implémenter la logique d'authentification ici
-		// Retourne true si le nom d'utilisateur et le mot de passe sont valides
-		return "validUser".equals(username) && "validPass".equals(password);
-	}
-
-	public boolean login(String username, String password) {
-		try {
-			// Đảm bảo kết nối được thiết lập
-			startSession();
-	
-			// Gửi yêu cầu đăng nhập
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			DataOutputStream dos = new DataOutputStream(bos);
-			dos.writeByte(7); // Type de paquet 7 pour la connexion
-			dos.writeUTF(username);
-			dos.writeUTF(password);
-			dos.flush();
-	
-			sendPacket(0, bos.toByteArray()); // Gửi gói tin đăng nhập đến server
-	
-			// Nhận phản hồi từ server
-			byte[] response = receivePacketFromServer();
-			String responseStr = new String(response);
-			return responseStr.equals("SUCCESS");
-		} catch (Exception e) {
 			System.err.println("Login failed due to an error: " + e.getMessage());
 			e.printStackTrace();
 			return false;
 		}
 	}
 
-	/**
-	 * Enregistre un nouvel utilisateur sur le serveur.
-	 * 
-	 * @param username Le nom d'utilisateur
-	 * @param password Le mot de passe
-	 * @return true si l'enregistrement est réussi, sinon false
-	 */
+	public boolean handleRegister(String username, String password) {
+		try (Socket socket = new Socket(serverAddress, serverPort)) {
+			DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+			DataInputStream dis = new DataInputStream(socket.getInputStream());
 
-	 public boolean register(String username, String password) {
-		try {
-			if (s == null || s.isClosed()) {
-				startSession();
-			}
-	
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			DataOutputStream dos = new DataOutputStream(bos);
-			dos.writeByte(8); // Gói tin đăng ký
-			dos.writeUTF(username);
-			dos.writeUTF(password);
-			dos.flush();
-	
-			sendPacket(0, bos.toByteArray());
-	
-			// Đợi phản hồi từ server
-			Packet responsePacket = waitForResponse();
-			if (responsePacket != null) {
-				String response = new String(responsePacket.data);
-				return response.equals("SUCCESS");
-			}
-			return false;
-		} catch (Exception e) {
+			dos.writeUTF("register:" + username + ":" + password);
+			String response = dis.readUTF();
+
+			return "register_success".equals(response);
+		} catch (IOException e) {
+			System.err.println("Registration error: " + e.getMessage());
 			e.printStackTrace();
 			return false;
 		}
 	}
-	
-	// Phương thức hỗ trợ đợi phản hồi
-	private Packet waitForResponse() {
-		final AtomicBoolean received = new AtomicBoolean(false);
-		final Packet[] response = new Packet[1];
-		
-		MessageListener tempListener = p -> {
-			if (p.destId == this.identifier) { // Kiểm tra gói tin gửi đến đúng client
-				response[0] = p;
-				received.set(true);
-			}
-		};
-		
-		this.addMessageListener(tempListener);
-		
-		try {
-			// Đợi tối đa 5 giây
-			int count = 0;
-			while (!received.get() && count < 50) {
-				Thread.sleep(100);
-				count++;
-			}
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		} finally {
-			this.mListeners.remove(tempListener);
-		}
-		
-		return response[0];
-	}
+
 
 	public boolean logout() {
 		try {
-			// Assurer que la connexion est établie
-			if (s == null || s.isClosed() || !s.isConnected()) {
-				startSession(); // Établir la connexion si elle n'existe pas
-			}
-	
-			// Envoyer une demande de déconnexion
+			ensureConnection(); // Ensure the connection is established
+
+			// Create a logout packet
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(bos);
-			dos.writeByte(9); // Type de paquet 9 pour la déconnexion
+			dos.writeByte(9); // Type 9: Logout
 			dos.flush();
-	
-			sendPacket(0, bos.toByteArray()); // Envoyer le paquet de déconnexion au serveur
-	
-			// Recevoir la réponse du serveur
+
+			sendPacket(0, bos.toByteArray()); // Send the packet to the server
+
+			// Receive the server's response
 			byte[] response = receivePacketFromServer();
 			String responseStr = new String(response);
 			return responseStr.equals("SUCCESS");
 		} catch (Exception e) {
+			System.err.println("Logout failed due to an error: " + e.getMessage());
 			e.printStackTrace();
 			return false;
 		}
 	}
 
-	/**
-	 * Reçoit un paquet du serveur.
-	 * 
-	 * @return le tableau d'octets reçu
-	 * @throws IOException si une erreur d'E/S se produit
-	 */
 	private byte[] receivePacketFromServer() throws IOException {
-		int length = dis.readInt();
+		int length = dis.readInt(); // Read the packet length
 		byte[] data = new byte[length];
-		dis.readFully(data);
+		dis.readFully(data); // Read all the data
 		return data;
 	}
 
 	public void ensureConnection() throws IOException {
 		if (s == null || s.isClosed() || !s.isConnected()) {
-			startSession(); // Établir la connexion
+			startSession(); // Establish a connection if it does not exist yet
 		}
 	}
-
-	/////////////////////////////
+		
+	////////////////////////////
 
 	
 
@@ -458,57 +336,38 @@ public class ClientMsg {
 
 	// }
 
-	public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {
-		ClientMsg client = new ClientMsg("localhost", 1666);
-	
-		Scanner scanner = new Scanner(System.in);
-	
-		System.out.println("1. Register");
-		System.out.println("2. Login");
-		System.out.println("3. Logout");
-		System.out.print("Choose an option: ");
-		int choice = scanner.nextInt();
-		scanner.nextLine(); // Consume newline
-	
-		switch (choice) {
-			case 1:
-				System.out.print("Enter username: ");
-				String regUsername = scanner.nextLine();
-				System.out.print("Enter password: ");
-				String regPassword = scanner.nextLine();
-				if (client.register(regUsername, regPassword)) {
-					System.out.println("Registration successful!");
-				} else {
-					System.out.println("Registration failed.");
-				}
-				break;
-	
-			case 2:
-				System.out.print("Enter username: ");
-				String loginUsername = scanner.nextLine();
-				System.out.print("Enter password: ");
-				String loginPassword = scanner.nextLine();
-				if (client.login(loginUsername, loginPassword)) {
-					System.out.println("Login successful!");
-				} else {
-					System.out.println("Login failed.");
-				}
-				break;
-	
-			case 3:
-				if (client.logout()) {
-					System.out.println("Logout successful!");
-				} else {
-					System.out.println("Logout failed.");
-				}
-				break;
-	
-			default:
-				System.out.println("Invalid option.");
-		}
-	
-		scanner.close();
-		client.closeSession();
-	}
+	// pour tester les fonctionnalités de login et d'enregistrement
+	public static void main(String[] args) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String host = "localhost";
+        int port = 1666;
 
+        try {
+            System.out.println("1. Register");
+            System.out.println("2. Login");
+            System.out.print("Choose an option: ");
+            int option = Integer.parseInt(reader.readLine());
+
+            System.out.print("Enter username: ");
+            String username = reader.readLine();
+            System.out.print("Enter password: ");
+            String password = reader.readLine();
+
+            ClientMsg client = new ClientMsg(host, port);
+            boolean result;
+
+            if (option == 1) {
+                result = client.handleRegister(username, password);
+                System.out.println(result ? "Registration successful!" : "Registration failed!");
+            } else if (option == 2) {
+                result = client.handleLogin(username, password);
+                System.out.println(result ? "Login successful!" : "Login failed!");
+            } else {
+                System.out.println("Invalid option.");
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

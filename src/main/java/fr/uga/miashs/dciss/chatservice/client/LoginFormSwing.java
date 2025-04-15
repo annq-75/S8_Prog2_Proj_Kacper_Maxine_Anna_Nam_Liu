@@ -22,7 +22,7 @@ public class LoginFormSwing {
         frame.add(loginPanel, "Login");
         frame.add(registerPanel, "Register");
 
-        // Hiển thị giao diện đăng nhập
+        // Afficher l'interface de connexion
         CardLayout cl = (CardLayout) frame.getContentPane().getLayout();
         cl.show(frame.getContentPane(), "Login");
 
@@ -46,10 +46,10 @@ public class LoginFormSwing {
         messageArea.setLineWrap(true);
         messageArea.setWrapStyleWord(true);
 
-        // Xử lý sự kiện khi nhấn nút "Login"
+        // Gérer l'événement lors de l'appui sur le bouton "Login"
         loginButton.addActionListener(e -> handleLogin(usernameField, passwordField, messageArea));
 
-        // Xử lý sự kiện khi nhấn nút "Register"
+        // Gérer l'événement lors de l'appui sur le bouton "Register"
         registerButton.addActionListener(e -> {
             CardLayout cl = (CardLayout) frame.getContentPane().getLayout();
             cl.show(frame.getContentPane(), "Register");
@@ -87,10 +87,10 @@ public class LoginFormSwing {
         messageArea.setLineWrap(true);
         messageArea.setWrapStyleWord(true);
 
-        // Xử lý sự kiện khi nhấn nút "Register"
+        // Gérer l'événement lors de l'appui sur le bouton "Register"
         registerButton.addActionListener(e -> handleRegister(usernameField, passwordField, confirmPasswordField, messageArea));
 
-        // Xử lý sự kiện khi nhấn nút "Back"
+        // Gérer l'événement lors de l'appui sur le bouton "Back"
         backButton.addActionListener(e -> {
             CardLayout cl = (CardLayout) frame.getContentPane().getLayout();
             cl.show(frame.getContentPane(), "Login");
@@ -119,13 +119,13 @@ public class LoginFormSwing {
             return;
         }
 
-        // Gọi ClientMsg để kết nối đến server
+        // Appeler ClientMsg pour se connecter au serveur
         ClientMsg client = new ClientMsg("localhost", 1666);
         try {
-            boolean loginSuccess = client.connectToServer("localhost", 1666, username, password);
+            boolean loginSuccess = client.handleLogin(username, password);
             if (loginSuccess) {
                 messageArea.setText("Login successful!");
-                // Mở giao diện chính sau khi đăng nhập thành công
+                // Ouvrir l'interface principale après une connexion réussie
                 openMainChatWindow(client);
             } else {
                 messageArea.setText("Login failed! Invalid username or password.");
@@ -151,10 +151,10 @@ public class LoginFormSwing {
             return;
         }
 
-        // Gọi ClientMsg để gửi yêu cầu đăng ký đến server
+        // Appeler ClientMsg pour envoyer une demande d'inscription au serveur
         ClientMsg client = new ClientMsg("localhost", 1666);
         try {
-            boolean registerSuccess = client.register(username, password);
+            boolean registerSuccess = client.handleRegister(username, password);
             if (registerSuccess) {
                 messageArea.setText("Registration successful!");
             } else {

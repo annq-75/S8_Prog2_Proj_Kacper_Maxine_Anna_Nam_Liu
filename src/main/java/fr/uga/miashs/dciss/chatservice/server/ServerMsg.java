@@ -76,12 +76,19 @@ public class ServerMsg {
 		u.beforeDelete();
 		return true;
 	}
-	///// Méthodes de gestion des utilisateurs simplifiées /////
+	///// Méthodes de gestion des utilisateurs /////
 
-	// Méthode pour connecter un utilisateur
-	public boolean loginUser(String username, String password) {
+		// Méthode pour connecter un utilisateur
+	public boolean loginUser(int userId, String username, String password) {
+		if (users.containsKey(userId)) {
+			LOG.warning("User with ID " + userId + " is already logged in.");
+			return false;
+		}
+
 		if (DatabaseManager.validateUser(username, password)) {
-			LOG.info("User " + username + " logged in successfully.");
+			UserMsg newUser = new UserMsg(userId, this);
+			users.put(userId, newUser);
+			LOG.info("User " + username + " logged in successfully with ID " + userId);
 			return true;
 		} else {
 			LOG.warning("Invalid login credentials for username: " + username);
@@ -90,7 +97,7 @@ public class ServerMsg {
 	}
 
 	// Méthode pour enregistrer un utilisateur
-	public boolean registerUser(String username, String password) {
+	public boolean registerUser(int userId, String username, String password) {
 		if (DatabaseManager.userExists(username)) {
 			LOG.warning("Registration failed: Username " + username + " already exists.");
 			return false;
@@ -105,6 +112,65 @@ public class ServerMsg {
 			return false;
 		}
 	}
+
+	// Méthode pour déconnecter un utilisateur
+	public boolean logoutUser(int userId) {
+		UserMsg user = users.remove(userId);
+		if (user != null) {
+			user.close();
+			LOG.info("User with ID " + userId + " logged out successfully.");
+			return true;
+		} else {
+			LOG.warning("Logout failed: User with ID " + userId + " not found.");
+			return false;
+		}
+	}
+
+	public void handleClientConnections(Socket clientSocket) {
+		try {
+			DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
+			DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
+	
+			String credentials = dis.readUTF(); // format: login:username:password
+			String[] parts = credentials.split(":");
+	
+			if (parts.length != 3) {
+				dos.writeUTF("invalid_format");
+				clientSocket.close();
+				return;
+			}
+	
+			String action = parts[0];
+			String username = parts[1];
+			String password = parts[2];
+	
+			if (action.equals("login")) {
+				if (DatabaseManager.validateUser(username, password)) {
+					dos.writeUTF("login_success");
+					System.out.println("[SERVER] User logged in: " + username);
+					// gérer la création d'utilisateur, thread, etc.
+				} else {
+					dos.writeUTF("login_failed");
+					clientSocket.close();
+				}
+			} else if (action.equals("register")) {
+				if (!DatabaseManager.userExists(username)) {
+					boolean registered = DatabaseManager.addUser(username, password);
+					dos.writeUTF(registered ? "register_success" : "register_failed");
+				} else {
+					dos.writeUTF("register_user_exists");
+				}
+				clientSocket.close();
+			} else {
+				dos.writeUTF("unknown_action");
+				clientSocket.close();
+			}
+	
+		} catch (IOException e) {
+			System.err.println("[SERVER] Error processing client request: " + e.getMessage());
+		}
+	}
+	
 
 	////////////////////////////
 		
@@ -133,79 +199,29 @@ public class ServerMsg {
 		}
 	}
 
+
+	// J'ai modifié cette méthode car j'ai déplacé toute la logique de l'ancienne méthode start() dans handleClientConnections()
+	// et j'ai laissé uniquement une boucle pour attendre de nouvelles connexions des clients
+
 	public void start() {
 		started = true;
+		LOG.info("Server started and waiting for client connections...");
+	
 		while (started) {
 			try {
-				// le serveur attend une connexion d'un client
+				// Accepter la connexion du client
 				Socket s = serverSock.accept();
-
-				DataInputStream dis = new DataInputStream(s.getInputStream());
-				DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-			
-				// logique de vérification de l'utilisateur
-				// Lire les informations de connexion du client
-				String username = dis.readUTF();
-				String password = dis.readUTF();
+				LOG.info("New client connection accepted: " + s.getInetAddress());
 	
-				// Vérification de l'utilisateur
-				if (DatabaseManager.validateUser(username, password)) {
-					// Connexion réussie
-					int userId = nextUserId.getAndIncrement();
-					dos.writeInt(userId); // Envoyer userId au client
-					dos.flush();
+				// Appeler handleClientConnection pour gérer la connexion
+				handleClientConnections(s);
 	
-					// Créer UserMsg et l'ajouter à la liste des utilisateurs
-					UserMsg user = new UserMsg(userId, this);
-					users.put(userId, user);
-	
-					// Connexion réussie, commencer à recevoir et envoyer des données
-					if (user.open(s)) {
-						LOG.info("Utilisateur " + username + " (ID : " + userId + ") connecté");
-						executor.submit(() -> user.receiveLoop());
-						executor.submit(() -> user.sendLoop());
-					} else {
-						s.close();
-					}
-				} else {
-					// Échec de la connexion
-					dos.writeInt(-1); // Envoyer un code d'erreur au client
-					dos.flush();
-					s.close();
-				}
-
-				// lit l'identifiant du client
-				int userId = dis.readInt();
-				//si 0 alors il faut créer un nouvel utilisateur et
-				// envoyer l'identifiant au client
-				if (userId == 0) {
-					userId = nextUserId.getAndIncrement();
-					dos.writeInt(userId);
-					dos.flush();
-					users.put(userId, new UserMsg(userId, this));
-				}
-				// si l'identifiant existe ou est nouveau alors 
-				// deux "taches"/boucles  sont lancées en parralèle
-				// une pour recevoir les messages du client, 
-				// une pour envoyer des messages au client
-				// les deux boucles sont gérées au niveau de la classe UserMsg
-				UserMsg x = users.get(userId);
-				if (x!= null && x.open(s)) {
-					LOG.info(userId + " connected");
-					// lancement boucle de reception
-					executor.submit(() -> x.receiveLoop());
-					// lancement boucle d'envoi
-					executor.submit(() -> x.sendLoop());
-				} else { // si l'idenfiant est inconnu, on ferme la connexion
-					s.close();
-				}
-
 			} catch (IOException e) {
-				LOG.info("Close server");
-				e.printStackTrace();
+				LOG.warning("Erreur lors de la connexion client : " + e.getMessage());
 			}
 		}
 	}
+	
 
 	public void stop() {
 		started = false;
@@ -224,9 +240,7 @@ public class ServerMsg {
 		DatabaseManager.insertTestUser();
 		ServerMsg s = new ServerMsg(1666);
 		s.start();
-
 	}
-
 	
 
 }
