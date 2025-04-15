@@ -122,7 +122,7 @@ public class ClientMsg {
 				if (identifier == 0) {
 					identifier = dis.readInt();
 				}
-				// Bắt đầu vòng lặp nhận tin nhắn
+				// Commencer la boucle de réception des messages
 				new Thread(() -> receiveLoop()).start();
 				notifyConnectionListeners(true);
 				System.out.println("Connection established successfully.");
@@ -141,7 +141,7 @@ public class ClientMsg {
 	 * @param data   the data to be sent
 	 */
 	public void sendPacket(int destId, byte[] data) throws IOException {
-		if (s == null || s.isClosed()) {
+		if (s == null || s.isClosed() || !s.isConnected()) {
 			throw new IllegalStateException("Socket is not connected. Ensure the connection is established.");
 		}
 		if (dos == null) {
@@ -250,13 +250,22 @@ public class ClientMsg {
 	 */
 	public boolean register(String username, String password) {
 		try {
-			// Đảm bảo kết nối được thiết lập
-			if (s == null || s.isClosed()) {
-				startSession();
+			// Assurer que la connexion est établie
+			if (s == null || s.isClosed() || !s.isConnected()) {
+				startSession(); // Établir la connexion si elle n'existe pas
 			}
 	
-			// Gửi yêu cầu đăng ký
-			sendPacket(1, (username + ":" + password).getBytes()); // Loại gói 1 cho đăng ký
+			// Envoyer une demande d'enregistrement
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(bos);
+			dos.writeByte(1); // Type de paquet 1 pour l'enregistrement
+			dos.writeUTF(username);
+			dos.writeUTF(password);
+			dos.flush();
+	
+			sendPacket(0, bos.toByteArray()); // Envoyer le paquet d'enregistrement au serveur
+	
+			// Recevoir la réponse du serveur
 			byte[] response = receivePacketFromServer();
 			String responseStr = new String(response);
 			return responseStr.equals("SUCCESS");

@@ -22,7 +22,7 @@ public class LoginFormSwing {
         frame.add(loginPanel, "Login");
         frame.add(registerPanel, "Register");
 
-        // Hiển thị giao diện đăng nhập
+        // Afficher l'interface de connexion
         CardLayout cl = (CardLayout) frame.getContentPane().getLayout();
         cl.show(frame.getContentPane(), "Login");
 
@@ -46,10 +46,10 @@ public class LoginFormSwing {
         messageArea.setLineWrap(true);
         messageArea.setWrapStyleWord(true);
 
-        // Xử lý sự kiện khi nhấn nút "Login"
+        // Gérer l'événement lors du clic sur le bouton "Login"
         loginButton.addActionListener(e -> handleLogin(usernameField, passwordField, messageArea));
 
-        // Xử lý sự kiện khi nhấn nút "Register"
+        // Gérer l'événement lors du clic sur le bouton "Register"
         registerButton.addActionListener(e -> {
             CardLayout cl = (CardLayout) frame.getContentPane().getLayout();
             cl.show(frame.getContentPane(), "Register");
@@ -61,7 +61,7 @@ public class LoginFormSwing {
         panel.add(passwordField);
         panel.add(loginButton);
         panel.add(registerButton);
-        panel.add(new JLabel()); // Placeholder
+        panel.add(new JLabel()); // Espace réservé
         panel.add(new JScrollPane(messageArea));
 
         return panel;
@@ -87,10 +87,10 @@ public class LoginFormSwing {
         messageArea.setLineWrap(true);
         messageArea.setWrapStyleWord(true);
 
-        // Xử lý sự kiện khi nhấn nút "Register"
+        // Gérer l'événement lors du clic sur le bouton "Register"
         registerButton.addActionListener(e -> handleRegister(usernameField, passwordField, confirmPasswordField, messageArea));
 
-        // Xử lý sự kiện khi nhấn nút "Back"
+        // Gérer l'événement lors du clic sur le bouton "Back"
         backButton.addActionListener(e -> {
             CardLayout cl = (CardLayout) frame.getContentPane().getLayout();
             cl.show(frame.getContentPane(), "Login");
@@ -104,7 +104,7 @@ public class LoginFormSwing {
         panel.add(confirmPasswordField);
         panel.add(registerButton);
         panel.add(backButton);
-        panel.add(new JLabel()); // Placeholder
+        panel.add(new JLabel()); // Espace réservé
         panel.add(new JScrollPane(messageArea));
 
         return panel;
@@ -115,23 +115,23 @@ public class LoginFormSwing {
         String password = new String(passwordField.getPassword());
 
         if (username.isEmpty() || password.isEmpty()) {
-            messageArea.setText("Username and password cannot be empty.");
+            messageArea.setText("Le nom d'utilisateur et le mot de passe ne peuvent pas être vides.");
             return;
         }
 
-        // Gọi ClientMsg để kết nối đến server
+        // Appeler ClientMsg pour se connecter au serveur
         ClientMsg client = new ClientMsg("localhost", 1666);
         try {
             boolean loginSuccess = client.connectToServer("localhost", 1666, username, password);
             if (loginSuccess) {
-                messageArea.setText("Login successful!");
-                // Mở giao diện chính sau khi đăng nhập thành công
+                messageArea.setText("Connexion réussie !");
+                // Ouvrir l'interface principale après une connexion réussie
                 openMainChatWindow(client);
             } else {
-                messageArea.setText("Login failed! Invalid username or password.");
+                messageArea.setText("Échec de la connexion ! Nom d'utilisateur ou mot de passe invalide.");
             }
         } catch (Exception ex) {
-            messageArea.setText("Error: " + ex.getMessage());
+            messageArea.setText("Erreur : " + ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -142,26 +142,26 @@ public class LoginFormSwing {
         String confirmPassword = new String(confirmPasswordField.getPassword());
 
         if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            messageArea.setText("All fields are required.");
+            messageArea.setText("Tous les champs sont obligatoires.");
             return;
         }
 
         if (!password.equals(confirmPassword)) {
-            messageArea.setText("Passwords do not match!");
+            messageArea.setText("Les mots de passe ne correspondent pas !");
             return;
         }
 
-        // Gọi ClientMsg để gửi yêu cầu đăng ký đến server
+        // Appeler ClientMsg pour envoyer une demande d'inscription au serveur
         ClientMsg client = new ClientMsg("localhost", 1666);
         try {
             boolean registerSuccess = client.register(username, password);
             if (registerSuccess) {
-                messageArea.setText("Registration successful!");
+                messageArea.setText("Inscription réussie !");
             } else {
-                messageArea.setText("Registration failed! Username may already exist.");
+                messageArea.setText("Échec de l'inscription ! Le nom d'utilisateur existe peut-être déjà.");
             }
         } catch (Exception ex) {
-            messageArea.setText("Error: " + ex.getMessage());
+            messageArea.setText("Erreur : " + ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -176,17 +176,18 @@ public class LoginFormSwing {
         JScrollPane scrollPane = new JScrollPane(chatArea);
 
         JTextField messageField = new JTextField();
-        JButton sendButton = new JButton("Send");
+        JButton sendButton = new JButton("Envoyer");
 
+        // Gérer l'événement lors de l'envoi d'un message
         sendButton.addActionListener(e -> {
             String message = messageField.getText();
             if (!message.isEmpty()) {
                 try {
                     client.sendPacket(0, message.getBytes());
-                    chatArea.append("You: " + message + "\n");
+                    chatArea.append("Vous : " + message + "\n");
                     messageField.setText("");
                 } catch (IOException ex) {
-                    chatArea.append("Error sending message: " + ex.getMessage() + "\n");
+                    chatArea.append("Erreur lors de l'envoi du message : " + ex.getMessage() + "\n");
                     ex.printStackTrace();
                 }
             }
