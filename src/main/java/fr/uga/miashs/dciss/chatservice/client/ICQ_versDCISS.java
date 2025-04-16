@@ -22,6 +22,10 @@ import java.nio.charset.StandardCharsets;
 import java.awt.Color;
 import javax.swing.SwingConstants;
 import javax.swing.JScrollPane;
+import javax.swing.border.TitledBorder;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.SoftBevelBorder;
+import java.awt.Font;
 
 public class ICQ_versDCISS {
 
@@ -77,9 +81,11 @@ public class ICQ_versDCISS {
 		panel.setLayout(new GridLayout(0, 2, 0, 0));
 		
 		JPanel panel_6 = new JPanel();
+		panel_6.setFont(new Font("Tahoma", Font.BOLD, 11));
 		panel.add(panel_6);
 		
 		JLabel lblNewLabel = new JLabel("Your number");
+		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblNewLabel.setForeground(new Color(0, 128, 128));
 		panel_6.add(lblNewLabel);
 		
@@ -108,6 +114,7 @@ public class ICQ_versDCISS {
 		panel_7.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		JLabel lblNewLabel_1 = new JLabel("Send to (number)");
+		lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblNewLabel_1.setHorizontalTextPosition(SwingConstants.CENTER);
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setForeground(new Color(0, 128, 128));
@@ -130,6 +137,7 @@ public class ICQ_versDCISS {
 		panel_10.setLayout(new GridLayout(0, 1, 0, 0));
 		
 		JLabel lbl_online = new JLabel("     Online     ");
+		lbl_online.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lbl_online.setForeground(new Color(46, 139, 87));
 		lbl_online.setBounds(new Rectangle(50, 50, 50, 50));
 		lbl_online.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
@@ -147,6 +155,7 @@ public class ICQ_versDCISS {
 		panel_11.setLayout(new GridLayout(0, 1, 0, 0));
 		
 		JLabel lblNewLabel_3 = new JLabel("     Off line     ");
+		lblNewLabel_3.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblNewLabel_3.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_3.setBounds(new Rectangle(50, 50, 50, 50));
 		lblNewLabel_3.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
@@ -175,6 +184,11 @@ public class ICQ_versDCISS {
 		//panel_2.add(textArea_msgs);
 		
 		textArea_msgs = new JTextArea(10, 30); // strs and clmns
+		textArea_msgs.setForeground(new Color(0, 102, 102));
+		textArea_msgs.setBounds(new Rectangle(50, 50, 50, 50));
+		textArea_msgs.setCaretColor(new Color(46, 139, 87));
+		textArea_msgs.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		textArea_msgs.setBackground(new Color(240, 255, 240));
 		textArea_msgs.setLineWrap(true);
 		textArea_msgs.setWrapStyleWord(true);
 		textArea_msgs.setEditable(false); // user have not to change the messages that are comming
@@ -189,10 +203,31 @@ public class ICQ_versDCISS {
 		//------------------------------------
 		});*/
 		
-		client.addMessageListener(p -> {
+		/*client.addMessageListener(p -> {
 		    String msg = p.srcId + " says: " + new String(p.data) + "\n";
 		    EventQueue.invokeLater(() -> textArea_msgs.append(msg));
+		});*/
+		
+		client.addMessageListener(p -> {
+		    byte[] data = p.data;
+
+		    if (data.length == 0) return;
+
+		    String msg = new String(data, StandardCharsets.UTF_8);
+
+		    // List online -- если это список онлайн — например, строка: "1,2,3,"
+		    if (msg.matches("(\\d+[,])*")) {
+		        String[] ids = msg.split(",");
+		        EventQueue.invokeLater(() -> {
+		            list_online.setListData(ids); // показываем в JList
+		        });
+		    } else {
+		        // usual mesge  -- обычное сообщение
+		        String display = p.srcId + " dit : " + msg + "\n";
+		        EventQueue.invokeLater(() -> textArea_msgs.append(display));
+		    }
 		});
+
 		
 		JPanel panel_3 = new JPanel();
 		frame.getContentPane().add(panel_3, BorderLayout.SOUTH);
@@ -205,21 +240,28 @@ public class ICQ_versDCISS {
 		panel_4.setLayout(new BoxLayout(panel_4, BoxLayout.X_AXIS));
 		
 		JButton btn_send = new JButton("Send");
+		btn_send.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btn_send.setForeground(new Color(0, 128, 128));
 		panel_4.add(btn_send);
 		
 
 		
 		JLabel labelMessage = new JLabel("     Message:");
+		labelMessage.setFont(new Font("Tahoma", Font.BOLD, 11));
 		labelMessage.setForeground(new Color(0, 128, 128));
 		panel_4.add(labelMessage);
 		
 		JPanel panel_16 = new JPanel();
+		panel_16.setBounds(new Rectangle(100, 100, 100, 100));
+		panel_16.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		panel_3.add(panel_16);
 		panel_16.setLayout(new BorderLayout(0, 0));
 		
 		JTextArea textArea_yourmsg = new JTextArea();
-		textArea_yourmsg.setBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(127, 255, 212), new Color(0, 128, 128)));
+		textArea_yourmsg.setForeground(new Color(0, 102, 102));
+		textArea_yourmsg.setBackground(new Color(245, 255, 250));
+		textArea_yourmsg.setBounds(new Rectangle(1000, 1000, 1000, 1000));
+		textArea_yourmsg.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		panel_16.add(textArea_yourmsg);
 		
 		btn_send.addActionListener(e -> {
@@ -233,13 +275,14 @@ public class ICQ_versDCISS {
 		        String affichage = "[Moi → " + dest + "] : " + msg + "\n";
 		        textArea_msgs.append(affichage);
 
-		        textArea_yourmsg.setText(""); // очищаем поле ввода
+		        textArea_yourmsg.setText(""); // clean message очищаем поле ввода
 		    } catch (NumberFormatException ex) {
 		        textArea_msgs.append("ID invalide\n");
 		    }
 		});
 		
 		JPanel panel_17 = new JPanel();
+		panel_17.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel_3.add(panel_17);
 		
 		JPanel panel_5 = new JPanel();
@@ -258,6 +301,20 @@ public class ICQ_versDCISS {
 		        client.closeSession();
 		    }
 		});
+		
+		// Btn "Actualiser"
+		JButton btnActualiser = new JButton("Actualiser les connectés");
+		btnActualiser.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		btnActualiser.setForeground(new Color(0, 102, 51));
+		panel.add(btnActualiser);
+
+		// after btn we send packet with type 2 for online users При нажатии отправляем пакет с типом 2 (запрос онлайн-юзеров)
+		btnActualiser.addActionListener(e -> {
+		    client.sendPacket(0, new byte[]{2}); // type 2 → demander liste en ligne
+		});
+
+		
+		
 	}
 
 }

@@ -161,4 +161,11 @@ public class ServerMsg {
 		s.start();
 	}
 
+	public Map<Integer, Boolean> getUsers() {
+	    Map<Integer, Boolean> userStatuses = new HashMap<>();
+	    for (Map.Entry<Integer, UserMsg> entry : users.entrySet()) {
+	        userStatuses.put(entry.getKey(), entry.getValue().isConnected());
+	    }
+	    return userStatuses;
+	}
 }
