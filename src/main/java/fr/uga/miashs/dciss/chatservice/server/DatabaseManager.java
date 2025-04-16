@@ -25,15 +25,6 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
-    
-    public static void initAllDatabases() {
-    	//initDatabase("DROP TABLE users;");		//uncomment if you've already created 'users' table, leave commented otherwise
-    	initDatabase(sqlUsers);
-    	initDatabase(sqlGroupUsers);
-    	initDatabase(sqlGroups);
-    	initDatabase(sqlMsgToBeServed);
-    	//initDatabase(sqlMsgSent);
-    }
 
     // Authentifier un utilisateur
     public static boolean validateUser(String username, String password) {

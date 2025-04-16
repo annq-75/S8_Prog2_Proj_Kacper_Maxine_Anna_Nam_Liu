@@ -127,49 +127,77 @@ public class ServerMsg {
 	}
 
 	public void handleClientConnections(Socket clientSocket) {
-		try {
-			DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
-			DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
-	
-			String credentials = dis.readUTF(); // format: login:username:password
-			String[] parts = credentials.split(":");
-	
-			if (parts.length != 3) {
-				dos.writeUTF("invalid_format");
-				clientSocket.close();
-				return;
-			}
-	
-			String action = parts[0];
-			String username = parts[1];
-			String password = parts[2];
-	
-			if (action.equals("login")) {
-				if (DatabaseManager.validateUser(username, password)) {
-					dos.writeUTF("login_success");
-					System.out.println("[SERVER] User logged in: " + username);
-					// gérer la création d'utilisateur, thread, etc.
-				} else {
-					dos.writeUTF("login_failed");
-					clientSocket.close();
-				}
-			} else if (action.equals("register")) {
-				if (!DatabaseManager.userExists(username)) {
-					boolean registered = DatabaseManager.addUser(username, password);
-					dos.writeUTF(registered ? "register_success" : "register_failed");
-				} else {
-					dos.writeUTF("register_user_exists");
-				}
-				clientSocket.close();
-			} else {
-				dos.writeUTF("unknown_action");
-				clientSocket.close();
-			}
-	
-		} catch (IOException e) {
-			System.err.println("[SERVER] Error processing client request: " + e.getMessage());
-		}
-	}
+    try {
+        DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
+        DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
+
+        boolean connected = true;
+
+        while (connected) {
+            dos.writeUTF("Welcome to ChatService");
+            String credentials = dis.readUTF(); // format: login:username:password
+            String[] parts = credentials.split(":");
+
+            if (parts.length != 3) {
+                dos.writeUTF("invalid_format");
+				continue; // Allow the user to retry
+            }
+
+            String action = parts[0];
+            String username = parts[1];
+            String password = parts[2];
+
+            if (action.equals("login")) {
+                if (DatabaseManager.validateUser(username, password)) {
+                    dos.writeUTF("login_success");
+                    System.out.println("[SERVER] User logged in: " + username);
+					// Call further processing after successful login (app communication)
+                    connected = false; // loop exit after successful login
+                } else {
+                    dos.writeUTF("login_failed");
+                    dos.writeUTF("Press 'y' to retry or any other key to exit.");
+                    String retry = dis.readUTF();
+                    if (!retry.equalsIgnoreCase("y")) {
+                        dos.writeUTF("Connection closed.");
+                        connected = false;
+                        clientSocket.close();
+                    }
+                }
+
+            } else if (action.equals("register")) {
+                if (!DatabaseManager.userExists(username)) {
+                    boolean registered = DatabaseManager.addUser(username, password);
+                    dos.writeUTF(registered ? "register_success" : "register_failed");
+                    dos.writeUTF("You can now login.");
+					// Allow the user to log in after registration without closing the socket
+                } else {
+                    dos.writeUTF("register_user_exists");
+                    dos.writeUTF("Press 'y' to retry or any other key to exit.");
+                    String retry = dis.readUTF();
+                    if (!retry.equalsIgnoreCase("y")) {
+                        dos.writeUTF("Connexion fermée.");
+                        connected = false;
+                        clientSocket.close();
+                    }
+                }
+
+            } else {
+                dos.writeUTF("unknown_action");
+                dos.writeUTF("Press 'y' to retry or any other key to exit.");
+                String retry = dis.readUTF();
+                if (!retry.equalsIgnoreCase("y")) {
+                    dos.writeUTF("Connection closed.");
+                    connected = false;
+                    clientSocket.close();
+                }
+            }
+        }
+
+    } catch (IOException e) {
+        System.err.println("[SERVER] Error processing client request: " + e.getMessage());
+    }
+}
+
 	
 
 	////////////////////////////
@@ -237,6 +265,7 @@ public class ServerMsg {
 	public static void main(String[] args) throws IOException {
 		// Initialize the database
 		DatabaseManager.initDatabase();
+		// DatabaseManager.initAllDatabas();
 		DatabaseManager.insertTestUser();
 		ServerMsg s = new ServerMsg(1666);
 		s.start();

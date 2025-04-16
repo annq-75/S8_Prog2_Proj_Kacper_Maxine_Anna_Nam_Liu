@@ -112,7 +112,7 @@ public class ClientMsg {
 	 * @throws IOException
 	 */
 
-	 // không nên tạo lại socket nếu socket hiện tại đã được kết nối
+	 // Ne pas recréer le socket si le socket actuel est déjà connecté
 	public void startSession() throws UnknownHostException {
 		if (s == null || s.isClosed()) {
 			try {
@@ -148,7 +148,7 @@ public class ClientMsg {
 	 */
 
 	public void sendPacket(int destId, byte[] data) throws IOException {
-		ensureConnection(); // Đảm bảo kết nối trước khi gửi
+		ensureConnection(); // la connexion est établie avant d'envoyer ?
 		if (dos == null) {
 			throw new IllegalStateException("DataOutputStream is not initialized. Ensure the connection is established.");
 		}
@@ -193,39 +193,96 @@ public class ClientMsg {
 	}
 
 
-	/////////////////////// Envoyer les informations de connexion au serveur
+	/////////////////////// Envoyer les informations de connexion au serveur ///////////////////////
 
-	public boolean handleLogin(String username, String password) {
-		try (Socket socket = new Socket(serverAddress, serverPort)) {
-			DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-			DataInputStream dis = new DataInputStream(socket.getInputStream());
-
-			dos.writeUTF("login:" + username + ":" + password);
-			String response = dis.readUTF();
-
-			return "login_success".equals(response);
+	public boolean handleLogin() {
+		try (Socket socket = new Socket(serverAddress, serverPort);
+			 DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+			 DataInputStream dis = new DataInputStream(socket.getInputStream());
+			 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+	
+			while (true) {
+				System.out.println("[SERVER] " + dis.readUTF()); // welcome/login prompt
+	
+				System.out.print("Enter username: ");
+				String username = reader.readLine();
+				System.out.print("Enter password: ");
+				String password = reader.readLine();
+	
+				dos.writeUTF("login:" + username + ":" + password);
+				dos.flush();
+	
+				String response = dis.readUTF();
+				System.out.println("[SERVER] " + response);
+	
+				if ("login_success".equals(response)) {
+					System.out.println("Login successful!");
+					return true;
+				} else {
+					System.out.println("Login failed.");
+					System.out.println("[SERVER] " + dis.readUTF()); // Retry prompt
+	
+					System.out.print(">>> ");
+					String retry = reader.readLine();
+					dos.writeUTF(retry);
+					dos.flush();
+	
+					if (!retry.equalsIgnoreCase("y")) {
+						System.out.println("[SERVER] " + dis.readUTF()); // goodbye message
+						return false;
+					}
+				}
+			}
 		} catch (IOException e) {
-			System.err.println("Login failed due to an error: " + e.getMessage());
-			e.printStackTrace();
+			System.err.println("Login error: " + e.getMessage());
 			return false;
 		}
 	}
-
-	public boolean handleRegister(String username, String password) {
-		try (Socket socket = new Socket(serverAddress, serverPort)) {
-			DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-			DataInputStream dis = new DataInputStream(socket.getInputStream());
-
-			dos.writeUTF("register:" + username + ":" + password);
-			String response = dis.readUTF();
-
-			return "register_success".equals(response);
+	
+	public boolean handleRegister() {
+		try (Socket socket = new Socket(serverAddress, serverPort);
+			 DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+			 DataInputStream dis = new DataInputStream(socket.getInputStream());
+			 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+	
+			while (true) {
+				System.out.println("[SERVER] " + dis.readUTF()); // welcome/register prompt
+	
+				System.out.print("Enter username: ");
+				String username = reader.readLine();
+				System.out.print("Enter password: ");
+				String password = reader.readLine();
+	
+				dos.writeUTF("register:" + username + ":" + password);
+				dos.flush();
+	
+				String response = dis.readUTF();
+				System.out.println("[SERVER] " + response);
+	
+				if ("register_success".equals(response)) {
+					System.out.println("Registration successful!");
+					return true;
+				} else {
+					System.out.println("Registration failed.");
+					System.out.println("[SERVER] " + dis.readUTF()); // Retry prompt
+	
+					System.out.print(">>> ");
+					String retry = reader.readLine();
+					dos.writeUTF(retry);
+					dos.flush();
+	
+					if (!retry.equalsIgnoreCase("y")) {
+						System.out.println("[SERVER] " + dis.readUTF()); // goodbye message
+						return false;
+					}
+				}
+			}
 		} catch (IOException e) {
 			System.err.println("Registration error: " + e.getMessage());
-			e.printStackTrace();
 			return false;
 		}
 	}
+	
 
 
 	public boolean logout() {
@@ -338,36 +395,36 @@ public class ClientMsg {
 
 	// pour tester les fonctionnalités de login et d'enregistrement
 	public static void main(String[] args) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        String host = "localhost";
-        int port = 1666;
-
-        try {
-            System.out.println("1. Register");
-            System.out.println("2. Login");
-            System.out.print("Choose an option: ");
-            int option = Integer.parseInt(reader.readLine());
-
-            System.out.print("Enter username: ");
-            String username = reader.readLine();
-            System.out.print("Enter password: ");
-            String password = reader.readLine();
-
-            ClientMsg client = new ClientMsg(host, port);
-            boolean result;
-
-            if (option == 1) {
-                result = client.handleRegister(username, password);
-                System.out.println(result ? "Registration successful!" : "Registration failed!");
-            } else if (option == 2) {
-                result = client.handleLogin(username, password);
-                System.out.println(result ? "Login successful!" : "Login failed!");
-            } else {
-                System.out.println("Invalid option.");
-            }
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		ClientMsg client = new ClientMsg("localhost", 1666);
+	
+		try {
+			boolean running = true; // controlling the loop
+			while (running) {
+				System.out.println("1. Register");
+				System.out.println("2. Login");
+				System.out.println("3. Exit");
+				System.out.print("Choose an option: ");
+				try {
+					int option = Integer.parseInt(reader.readLine());
+	
+					if (option == 1) {
+						client.handleRegister();
+					} else if (option == 2) {
+						client.handleLogin();
+					} else if (option == 3) {
+						System.out.println("Exiting the application. Goodbye!");
+						running = false; // loop exit
+					} else {
+						System.out.println("Invalid option. Please try again.");
+					}
+				} catch (NumberFormatException e) {
+					System.out.println("Invalid input. Please enter a number (1, 2, or 3).");
+				}
+			}
+		} catch (IOException e) {
+			System.err.println("Client error: " + e.getMessage());
+		}
+	}
+	
 }
