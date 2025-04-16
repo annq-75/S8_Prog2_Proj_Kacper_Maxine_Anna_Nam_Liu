@@ -76,7 +76,12 @@ import java.util.Set;
 		 }else if(type == 11) {
 			 //stockage des messages envoyés (mais non recus)
 		 }
-		 else {
+		 elseif(type == 12){
+			// Version-liu 
+			                // FR : Envoi des groupes créés par l'utilisateur -- RU: Список групп, созданных пользователем
+			                sendCreatedGroups(p.srcId);
+		 } else{
+
 			 // FR : Commande inconnue -- RU: Неизвестный тип команды
 			 LOG.warning("Server message of type=" + type + " not handled by processor");
 		 }
@@ -211,5 +216,32 @@ import java.util.Set;
 		 // les messages qui ne n'ont pas été envoyés -> si il y en a ou le destId == userId alors on envoie
 		 // -> utilisation de 
 	 }
+
+	 //----------------------les méthodes de liu-----------------------------
+	 //Version- Liu
+	     // ----------- Envoi des groupes créés par l'utilisateur -----------
+	     private void sendCreatedGroups(int userId) {
+	         Set<GroupMsg> createdGroups = new HashSet<>();
+	 
+	         // 遍历服务器上的所有群组
+	         for (GroupMsg group : server.getGroups().values()) {
+	             if (group.getOwner().getId() == userId) {
+	                 createdGroups.add(group);
+	             }
+	         }
+	 
+	  // 用ByteBuffer打包
+	         ByteBuffer buffer = ByteBuffer.allocate(4 + createdGroups.size() * 4);
+	         buffer.putInt(createdGroups.size());
+	         for (GroupMsg g : createdGroups) {
+	             buffer.putInt(g.getId());
+	         }
+	 
+	 Packet response = new Packet(ServerMsg.SERVER_CLIENTID, -2, buffer.array());
+	         UserMsg destUser = server.getUser(userId);
+	         if (destUser != null) {
+	             destUser.process(response);
+	         }
+	 
  }
  

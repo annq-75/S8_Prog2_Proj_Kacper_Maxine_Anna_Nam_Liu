@@ -17,6 +17,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
+import fr.uga.miashs.dciss.chatservice.client.MessageHistory;
 import fr.uga.miashs.dciss.chatservice.common.Packet;
 
 import java.util.*;
@@ -35,6 +36,12 @@ public class ServerMsg {
 	private Map<Integer, UserMsg> users;
 	private Map<Integer, GroupMsg> groups;
 
+	
+	// MessageHistory-Liu
+	private MessageHistory messageHistory = new MessageHistory();
+
+
+	
 	// séquences pour générer les identifiant d'utilisateurs et de groupe
 	private AtomicInteger nextUserId;
 	private AtomicInteger nextGroupId;
@@ -80,7 +87,9 @@ public class ServerMsg {
 	public UserMsg getUser(int userId) {
 		return users.get(userId);
 	}
-
+	
+	
+	
 	// Methode utilisée pour savoir quoi faire d'un paquet
 	// reçu par le serveur
 	public void processPacket(Packet p) {
@@ -96,10 +105,22 @@ public class ServerMsg {
 		} else { // message de gestion pour le serveur
 			pp = sp;
 		}
-
+		
+		// Version-Liu
 		if (pp != null) {
 			pp.process(p);
+			
+			// 保存消息历史，假设目标用户在线
+			messageHistory.addMessage(
+				p.destId,
+				new MessageHistory.MessageRecord(p.srcId, p.destId, new String(p.data))
+			);
 		}
+		
+		
+		// if (pp != null) {
+		// 	pp.process(p);
+		// }
 	}
 
 	public void start() {
@@ -156,15 +177,10 @@ public class ServerMsg {
 		}
 	}
 
-	
-	//---------------------
-	public Map<Integer, Boolean> getUsers() {
-		Map<Integer, Boolean> userStatuses = new HashMap<>();
-		for (Map.Entry<Integer, UserMsg> entry : users.entrySet()) {
-			userStatuses.put(entry.getKey(), entry.getValue().isConnected());
-		}
-		return userStatuses;
+	public MessageHistory getMessageHistory() {
+		return messageHistory;
 	}
+	
 
 	public static void main(String[] args) throws IOException {
 		// Initialize the database
@@ -172,6 +188,45 @@ public class ServerMsg {
 		DatabaseManager.insertTestUser();
 		ServerMsg s = new ServerMsg(1666);
 		s.start();
+		
+		
+//		//test history- liu
+//		// 初始化数据库
+//		 DatabaseManager.initAllDatabase();
+//		 DatabaseManager.insertTestUser();
+//
+//		 ServerMsg s = new ServerMsg(1666);
+//		 
+//		 // 启动服务器线程
+//		 new Thread(() -> s.start()).start();
+//
+//		 // 等待几秒，假设用户和消息已经传输
+//		 try {
+//		 Thread.sleep(5000); // 假设等5秒
+//		 } catch (InterruptedException e) {
+//		 e.printStackTrace();
+//		 }
+//
+//		 // 查询用户2的消息历史
+//		 List<MessageHistory.MessageRecord> history = s.getMessageHistory().getUserHistory(2);
+//		 for (MessageHistory.MessageRecord record : history) {
+//		 System.out.println("From: " + record.getFromId() + 
+//		 " -> To: " + record.getDestId() + 
+//		 " Content: " + record.getContent() + 
+//		 " Time: " + new Date(record.getTimestamp()));
+//		 }
+		
 	}
 
+	public Map<Integer, Boolean> getUsers() {
+	    Map<Integer, Boolean> userStatuses = new HashMap<>();
+	    for (Map.Entry<Integer, UserMsg> entry : users.entrySet()) {
+	        userStatuses.put(entry.getKey(), entry.getValue().isConnected());
+	    }
+	    return userStatuses;
+	}
+	
+	public Map<Integer, GroupMsg> getGroups() {
+	    return groups;
+	}
 }
