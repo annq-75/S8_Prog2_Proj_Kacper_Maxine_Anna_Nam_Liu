@@ -189,7 +189,7 @@ public class ServerMsg {
 
 	public static void main(String[] args) throws IOException {
 		// Initialize the database
-		DatabaseManager.initDatabase();
+		DatabaseManager.initAllDatabases();
 		DatabaseManager.insertTestUser();
 		ServerMsg s = new ServerMsg(1666);
 		s.start();
@@ -203,7 +203,7 @@ public class ServerMsg {
 		return null;
 	}*/
 	
-	public Map<Integer, Boolean> getUsers() {
+	/*public Map<Integer, Boolean> getUsers() {
 	    Map<Integer, Boolean> users = new HashMap<>();
 	    try (Connection cnx = DriverManager.getConnection("jdbc:sqlite:sample.db")) {
 	        String query = "SELECT id, is_online FROM MsgUser";
@@ -219,7 +219,7 @@ public class ServerMsg {
 	        e.printStackTrace();
 	    }
 	    return users;
-	}
+	}*/
 
 	
 

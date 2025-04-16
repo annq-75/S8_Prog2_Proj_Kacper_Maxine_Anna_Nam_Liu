@@ -122,5 +122,81 @@ public class DatabaseManager {
         }
     }
     
+    public static boolean isOwner(int idUserAsking, int idGroup) {
+    	//Vérification owner ? (idUser)
+    	String queryOwner = "SELECT * FROM groupUsers WHERE idGroup = ? AND idOwner = ?";
+    	try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(queryOwner)) {
 
+               stmt.setInt(1, idGroup);
+               stmt.setInt(2, idUserAsking);
+
+               try (ResultSet rs = stmt.executeQuery()) {
+            	   System.out.println("[DB] User is the owner of group '" + idGroup + "': " + rs.next());
+                   if (rs.next() == false) { // if rs.next() == false <=> pas de lignes renvoyées dans la requête, donc idUser n'est PAS l'owner du groupe dans il/elle veut rajouter un utilisateur
+                	   return false;
+                   } else // if rs.next() == true <=> au moins 1 ligne renvoyée par la requête, donc idUser est bien l'owner du groupe dans il/elle veut rajouter un utilisateur
+                	   return true;
+               }
+           } catch (SQLException e) {
+               System.err.println("[DB] Group ownership failed: " + e.getMessage());
+               e.printStackTrace();
+           }
+		return false;
+    }
+
+    	
+    public static void addUserToGroup(int idUserAsking, int idGroup, int idInvitedUser) {	
+    	//if data packet dit modifier groupe > owner?? > oui > ajouter utilisateur
+    	if (isOwner(idInvitedUser, idGroup)) {
+    		//1. check if invited user exists in the database
+    		String queryInvitedUserExists = "SELECT * FROM users WHERE id = ?";
+    		try (Connection conn = getConnection();
+                    PreparedStatement stmt = conn.prepareStatement(queryInvitedUserExists)) {
+
+                   stmt.setInt(1, idInvitedUser);
+
+                   try (ResultSet rs = stmt.executeQuery()) {
+                       if (rs.next() == false) { // if rs.next() == false <=> pas de lignes renvoyées dans la requête, donc idInvitedUser n'est pas un user enregistré
+                    	   System.out.println("[DB] Invited user doesn't exist.");
+                    	   
+                       } else // if rs.next() == true <=> au moins 1 ligne renvoyée par la requête, donc idInvitedUser est un user enregistré
+                    	   System.out.println("[DB] Invited user exists.");
+                       
+                       //2. check if invited user is already in the group
+                       String queryInvitedUserAlreadyInGroup = "SELECT * FROM groupUsers WHERE idGroup = ? AND idUser = ?";
+                       try (Connection connec = getConnection();
+                               PreparedStatement stmt2 = connec.prepareStatement(queryInvitedUserAlreadyInGroup)) {
+
+                    	   	  stmt2.setInt(1, idGroup);
+                              stmt2.setInt(2, idInvitedUser);
+
+                              try (ResultSet rs2 = stmt2.executeQuery()) {
+                                  if (rs.next() == false) { // if rs.next() == false <=> pas de lignes renvoyées dans la requête, donc idInvitedUser n'est pas enregistré dans le groupe
+                               	   System.out.println("[DB] Invited user  isn't in the group yet.");
+                               	   // ADD THEM TO THE GROUP !!!!
+                               	   
+                                  } else // if rs.next() == true <=> au moins 1 ligne renvoyée par la requête, donc idInvitedUser est déjà dans le groupe
+                               	   System.out.println("[DB] Invited user is already in the group.");
+                              }
+                       } catch (SQLException e) {
+                    	   System.err.println("[DB] Invited user existance check failed: " + e.getMessage());
+                    	   e.printStackTrace();
+                       }
+                   } catch (SQLException e) {
+                       System.err.println("[DB] Group ownership failed: " + e.getMessage());
+                       e.printStackTrace();
+                   }
+    		
+                   } catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    
+    		} else
+		// userid isn't the owner
+    			;
+    }
+    
+    
 }

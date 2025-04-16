@@ -18,29 +18,29 @@ Anna, Kacper, Liu, Maxine, Nam
 
 ---
 
-#### Affectation des tâches pour la journée (+ niveau de finalisation atteint) :
+#### Affectation des tâches :
 
 **Groupes**
-- liste des groupes concernés -> Anna
-- ajout des données dans les tables groups et groupUsers lorsque groupe créé -> Anna
-- modification des données dans les tables groups et groupUsers lorsque groupe modifié (ajout ou suppression d'un utilisateur) -> Maxine
-- ajouter vérification lors de la création/modification/suppression d'un groupe ou d'un utilisateur du groupe, -> groupe existant/ utilisateur existant / droit de modification/suppression (si utilisateur est l'owner du groupe) -> Maxine
+- liste des groupes concernés -> Anna (en cours)
+- ajout des données dans les tables groups et groupUsers lorsque groupe créé -> Anna (en cours)
+- modification des données dans les tables groups et groupUsers lorsque groupe modifié (ajout ou suppression d'un utilisateur) -> Maxine 
+- ajouter vérification lors de la création/modification/suppression d'un groupe ou d'un utilisateur du groupe, -> groupe existant/ utilisateur existant / droit de modification/suppression (si utilisateur est l'owner du groupe) -> Maxine (en cours)
 - ajout du nouveau groupe à la liste après création réussie -> ???
 
 **Messages**
-- historique des messages -> Liu
+- historique des messages -> Liu (en cours)
 - lien table messages en attente et liste d'utilisateurs connectés > envoi des messages et modifications dans la table -> ???
-- définir les protocoles plus en détails/ comment les paquetages sont divisés -> Kacper
-- stockage des messages -> Liu
+- définir les protocoles plus en détails/ comment les paquetages sont divisés -> Kacper (en cours)
+- stockage des messages -> Liu (en cours)
 
 **Users**
-- login utilisateur (réparer les erreurs) -> Nam
+- login utilisateur (réparer les erreurs) -> Nam (terminé ?)
 - quand authentification réussie, connection avec application message (chat form) -> Anna / Nam
-- liste de users connectés -> Anna
-- liste de users déconnectés -> Anna
+- liste de users connectés -> Anna (en cours)
+- liste de users déconnectés -> Anna (en cours)
 
 **Serveur**
-- (OK) création tables dans bases de données côté serveur (messages en attente, groupes et users, et table de jointure groupUsers) -> Maxine
+- création tables dans bases de données côté serveur (messages en attente, groupes et users, et table de jointure groupUsers) -> Maxine (OK)
 - résoudre les problèmes du serveur (apparus ce matin) -> en pause en attendant la réparation du login
 
 ---
@@ -48,7 +48,7 @@ Anna, Kacper, Liu, Maxine, Nam
 #### Questionnements
 
 - Comment les paquets sont traités / divisés pour extraire les différentes infos utiles
-- 
+- Quel format de stockage pour les messages côté client (bdd ou liste)
 
 ---
 
@@ -58,3 +58,4 @@ Anna, Kacper, Liu, Maxine, Nam
 > SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
 > SLF4J: Defaulting to no-operation (NOP) logger implementation
 > SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+- Ce problème nous a empêché de réaliser des tests aujourd'hui. On espère pouvoir le régler rapidement demain pour continuer à avancer.
