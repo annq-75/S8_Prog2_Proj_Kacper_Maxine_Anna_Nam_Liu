@@ -103,7 +103,7 @@ import java.util.Set;
 		 sendTextResponse(ownerId, ack);
 	 }
  
-	 // ----------- Envoi des utilisateurs en ligne -----------
+	 // ----------- Envoi des utilisateurs en ligne -----------Anna
 	 private void sendOnlineUsers(int requesterId) {
 		    StringBuilder sb = new StringBuilder();
 		    Map<Integer, Boolean> connectedUsers = server.getUsers(); // or getOnlineUserIds()

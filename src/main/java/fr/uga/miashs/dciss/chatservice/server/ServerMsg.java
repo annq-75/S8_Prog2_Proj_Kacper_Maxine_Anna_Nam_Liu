@@ -218,7 +218,7 @@ public class ServerMsg {
 		
 	}
 
-	public Map<Integer, Boolean> getUsers() {
+	public Map<Integer, Boolean> getUsers() {//Anna
 	    Map<Integer, Boolean> userStatuses = new HashMap<>();
 	    for (Map.Entry<Integer, UserMsg> entry : users.entrySet()) {
 	        userStatuses.put(entry.getKey(), entry.getValue().isConnected());

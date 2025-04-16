@@ -14,6 +14,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EtchedBorder;
 import java.awt.Rectangle;
+import java.awt.Color;
+import java.awt.Font;
 
 public class GroupWindow extends JFrame {
 
@@ -75,6 +77,7 @@ public class GroupWindow extends JFrame {
 		panel_4.add(panel_7);
 		
 		JLabel lbl_gr_choice = new JLabel("Choose a group :");
+		lbl_gr_choice.setForeground(new Color(0, 128, 128));
 		panel_7.add(lbl_gr_choice);
 		
 		JPanel panel_8 = new JPanel();
@@ -88,12 +91,14 @@ public class GroupWindow extends JFrame {
 		panel_4.add(panel_9);
 		
 		JButton btn_gr_change = new JButton("Change");
+		btn_gr_change.setForeground(new Color(0, 128, 128));
 		panel_9.add(btn_gr_change);
 		
 		JPanel panel_11 = new JPanel();
 		panel_4.add(panel_11);
 		
 		JButton btnNewButton_1 = new JButton("Delete");
+		btnNewButton_1.setForeground(new Color(128, 0, 0));
 		panel_11.add(btnNewButton_1);
 		
 		JPanel panel_5 = new JPanel();
@@ -106,6 +111,7 @@ public class GroupWindow extends JFrame {
 		panel_5.add(panel_12);
 		
 		JButton btnNewButton = new JButton("Create a group :");
+		btnNewButton.setForeground(new Color(0, 128, 0));
 		panel_12.add(btnNewButton);
 		
 		JPanel panel_13 = new JPanel();
@@ -121,6 +127,8 @@ public class GroupWindow extends JFrame {
 		panel_5.add(panel_15);
 		
 		JButton btnNewButton_2 = new JButton("Refresh groups");
+		btnNewButton_2.setFont(new Font("Tahoma", Font.BOLD, 11));
+		btnNewButton_2.setForeground(new Color(0, 128, 128));
 		panel_15.add(btnNewButton_2);
 		
 		JPanel panel_6 = new JPanel();
@@ -131,7 +139,16 @@ public class GroupWindow extends JFrame {
 		panel_6.add(scrollPane);
 		
 		JTextArea textArea = new JTextArea();
+		textArea.setBackground(new Color(245, 255, 250));
 		scrollPane.setViewportView(textArea);
+		
+		JPanel panel_14 = new JPanel();
+		panel_6.add(panel_14, BorderLayout.NORTH);
+		
+		JLabel lbl_your_groups = new JLabel("Your groups");
+		lbl_your_groups.setFont(new Font("Tahoma", Font.BOLD, 11));
+		lbl_your_groups.setForeground(new Color(0, 128, 128));
+		panel_14.add(lbl_your_groups);
 	}
 
 }

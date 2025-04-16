@@ -158,9 +158,32 @@ public class ICQ_versDCISS {
 		panel_10.add(panel_for_list_online);
 		panel_for_list_online.setLayout(new BorderLayout(0, 0));
 		
-		JList list_online = new JList();
-		panel_for_list_online.add(list_online);
+		JScrollPane scrollPane_1 = new JScrollPane();
+		panel_for_list_online.add(scrollPane_1, BorderLayout.NORTH);
 		
+		JTextArea txtrOnline = new JTextArea();
+		scrollPane_1.setViewportView(txtrOnline);
+		
+		/*client.addMessageListener(p -> {
+		    byte[] data = p.data;
+
+		    if (data.length == 0) return;
+
+		    String msg = new String(data, StandardCharsets.UTF_8);
+
+		    // List online -- если это список онлайн — например, строка: "1,2,3,"
+		    if (msg.matches("(\\d+[,])*")) {
+		        String[] ids = msg.split(",");
+		        EventQueue.invokeLater(() -> {
+		            list_online.setListData(ids); // показываем в JList
+		        });
+		    } else {
+		        // usual mesge  -- обычное сообщение
+		        String display = p.srcId + " dit : " + msg + "\n";
+		        EventQueue.invokeLater(() -> textArea_msgs.append(display));
+		    }
+		});
+		*/
 		JPanel panel_11 = new JPanel();
 		panel_1.add(panel_11);
 		panel_11.setLayout(new GridLayout(0, 1, 0, 0));
@@ -220,7 +243,7 @@ public class ICQ_versDCISS {
 		    EventQueue.invokeLater(() -> textArea_msgs.append(msg));
 		});*/
 		
-		client.addMessageListener(p -> {
+		/*client.addMessageListener(p -> {
 		    byte[] data = p.data;
 
 		    if (data.length == 0) return;
@@ -238,7 +261,7 @@ public class ICQ_versDCISS {
 		        String display = p.srcId + " dit : " + msg + "\n";
 		        EventQueue.invokeLater(() -> textArea_msgs.append(display));
 		    }
-		});
+		});*/
 
 		
 		JPanel panel_3 = new JPanel();
