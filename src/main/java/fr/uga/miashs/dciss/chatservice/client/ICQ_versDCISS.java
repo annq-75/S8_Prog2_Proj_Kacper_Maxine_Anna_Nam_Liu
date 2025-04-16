@@ -26,6 +26,9 @@ import javax.swing.border.TitledBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import java.awt.Font;
+import java.awt.Dimension;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ICQ_versDCISS {
 
@@ -174,6 +177,7 @@ public class ICQ_versDCISS {
 		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
 		
 		JPanel panel_8 = new JPanel();
+		panel_8.setMaximumSize(new Dimension(10, 32767));
 		panel_8.setBounds(new Rectangle(50, 50, 50, 50));
 		panel_8.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel_2.add(panel_8);
@@ -285,87 +289,6 @@ public class ICQ_versDCISS {
 		panel_17.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel_3.add(panel_17);
 		
-		JPanel panel_gr = new JPanel();
-		frame.getContentPane().add(panel_gr, BorderLayout.EAST);
-		panel_gr.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JPanel panel_btns_gr = new JPanel();
-		panel_gr.add(panel_btns_gr);
-		panel_btns_gr.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JPanel panel_14 = new JPanel();
-		panel_14.setBounds(new Rectangle(50, 50, 50, 50));
-		panel_14.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_btns_gr.add(panel_14);
-		panel_14.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JPanel panel_24 = new JPanel();
-		panel_14.add(panel_24);
-		
-		JButton btn_create_gr = new JButton("New group");
-		btn_create_gr.setForeground(new Color(0, 128, 128));
-		panel_24.add(btn_create_gr);
-		
-		JPanel panel_25 = new JPanel();
-		panel_14.add(panel_25);
-		
-		JPanel panel_5 = new JPanel();
-		panel_5.setBounds(new Rectangle(50, 50, 50, 50));
-		panel_5.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_btns_gr.add(panel_5);
-		panel_5.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JPanel panel_gr_id = new JPanel();
-		panel_gr_id.setBackground(UIManager.getColor("CheckBox.light"));
-		panel_5.add(panel_gr_id);
-		panel_gr_id.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		
-		JPanel panel_26 = new JPanel();
-		panel_gr_id.add(panel_26);
-		
-		JButton btn_der_gr = new JButton("Delete group");
-		btn_der_gr.setForeground(new Color(0, 128, 128));
-		panel_26.add(btn_der_gr);
-		
-		JTextArea textArea_gr_id = new JTextArea();
-		textArea_gr_id.setColumns(1);
-		textArea_gr_id.setBackground(new Color(240, 255, 240));
-		panel_gr_id.add(textArea_gr_id);
-		
-		JPanel panel_list_gr = new JPanel();
-		panel_list_gr.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_gr.add(panel_list_gr);
-		panel_list_gr.setLayout(new BorderLayout(0, 0));
-		
-		JPanel panel_15 = new JPanel();
-		panel_list_gr.add(panel_15, BorderLayout.SOUTH);
-		
-		JPanel panel_20 = new JPanel();
-		panel_list_gr.add(panel_20, BorderLayout.WEST);
-		
-		JPanel panel_21 = new JPanel();
-		panel_list_gr.add(panel_21, BorderLayout.EAST);
-		
-		JPanel panel_22 = new JPanel();
-		panel_list_gr.add(panel_22, BorderLayout.NORTH);
-		
-		JLabel lbl_gr = new JLabel("My groups");
-		lbl_gr.setVerticalAlignment(SwingConstants.TOP);
-		lbl_gr.setForeground(new Color(0, 128, 128));
-		lbl_gr.setFont(new Font("SimSun-ExtB", Font.BOLD, 11));
-		panel_22.add(lbl_gr);
-		
-		JPanel panel_23 = new JPanel();
-		panel_23.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_list_gr.add(panel_23, BorderLayout.CENTER);
-		panel_23.setLayout(new BorderLayout(0, 0));
-		
-		JScrollPane scrollPane_1 = new JScrollPane();
-		panel_23.add(scrollPane_1);
-		
-		JTextArea textArea = new JTextArea();
-		scrollPane_1.setViewportView(textArea);
-		
 		//close session correct
 		frame.addWindowListener(new java.awt.event.WindowAdapter() {
 		    @Override
@@ -392,6 +315,24 @@ public class ICQ_versDCISS {
 		
 		JPanel panel_12 = new JPanel();
 		panel.add(panel_12);
+		panel_12.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel_5 = new JPanel();
+		panel_12.add(panel_5, BorderLayout.NORTH);
+		
+		JPanel panel_14 = new JPanel();
+		panel_12.add(panel_14, BorderLayout.SOUTH);
+		
+		JButton btnNewButton = new JButton("Group management ");
+		btnNewButton.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				GroupWindow gr_w = new GroupWindow(client.getIdentifier());
+				gr_w.setVisible(true);
+			}
+		});
+		btnNewButton.setForeground(new Color(0, 128, 128));
+		panel_12.add(btnNewButton, BorderLayout.WEST);
 
 		
 		
