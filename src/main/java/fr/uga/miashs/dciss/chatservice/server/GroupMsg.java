@@ -77,5 +77,9 @@ public class GroupMsg implements PacketProcessor {
 	public void beforeDelete() {
 		members.forEach(m->m.getGroups().remove(this));
 	}
+	
+	public UserMsg getOwner() {
+	    return owner;
+	}
 
 }

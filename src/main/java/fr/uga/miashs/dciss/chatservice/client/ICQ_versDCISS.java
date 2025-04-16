@@ -26,10 +26,35 @@ import javax.swing.border.TitledBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import java.awt.Font;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import javax.swing.JLabel;
+import java.awt.FlowLayout;
+import javax.swing.JButton;
+import javax.swing.BoxLayout;
+import javax.swing.JList;
+import javax.swing.JTextArea;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.border.EtchedBorder;
+import java.awt.Rectangle;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.awt.Color;
+import javax.swing.SwingConstants;
+import javax.swing.JScrollPane;
+import javax.swing.border.TitledBorder;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.SoftBevelBorder;
+import java.awt.Font;
 
 public class ICQ_versDCISS {
 
 	private JFrame frame;
+	private ClientMsg client;
+	private JTextArea textArea_msgs;
 	private ClientMsg client;
 	private JTextArea textArea_msgs;
 
@@ -53,6 +78,13 @@ public class ICQ_versDCISS {
 	 * Create the application.
 	 */
 	public ICQ_versDCISS() {
+	    try {
+	        initialize();
+	    } catch (UnknownHostException e) {
+	        e.printStackTrace();
+	        // show err:
+	        JOptionPane.showMessageDialog(null, "Connection to server is impossible.");
+	    }
 	    try {
 	        initialize();
 	    } catch (UnknownHostException e) {
