@@ -5,12 +5,12 @@ import java.sql.*;
 public class DatabaseManager {
     private static final String DB_URL = "jdbc:sqlite:chatservice.db";
 
-    // Méthode utilitaire pour obtenir une connexion à la base de données
+    // Phương thức tiện ích để lấy kết nối cơ sở dữ liệu
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(DB_URL);
     }
 
-    // Initialiser la base de données
+    // Khởi tạo cơ sở dữ liệu
     public static void initDatabase() {
         String sql = "CREATE TABLE IF NOT EXISTS users (" +
                      "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -24,6 +24,15 @@ public class DatabaseManager {
             System.err.println("[DB] Échec de l'initialisation de la base de données : " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    public static void initAllDatabases() {
+    	//initDatabase("DROP TABLE users;");		//uncomment if you've already created 'users' table, leave commented otherwise
+    	initDatabase(sqlUsers);
+    	initDatabase(sqlGroupUsers);
+    	initDatabase(sqlGroups);
+    	initDatabase(sqlMsgToBeServed);
+    	//initDatabase(sqlMsgSent);
     }
 
     // Authentifier un utilisateur
@@ -122,4 +131,6 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
+    
+
 }

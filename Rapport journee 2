@@ -1,0 +1,51 @@
+## Jour 2 : 15/04/2025
+
+
+**Membres du projet**
+Anna, Kacper, Liu, Maxine, Nam
+
+**Lien vers le dépot git**
+[Dépot git de notre projet de messagerie](https://github.com/annq-75/S8_Prog2_Proj_Kacper_Maxine_Anna_Nam_Liu#)
+
+
+---
+
+
+#### Affectation des tâches pour la journée (+ niveau de finalisation atteint) :
+
+**Groupes**
+- liste des groupes concernés -> Anna
+- ajout des données dans les tables groups et groupUsers lorsque groupe créé -> ???
+- modification des données dans les tables groups et groupUsers lorsque groupe modifié (ajout ou suppression d'un utilisateur) -> ???
+- ajouter vérification lors de la création/modification/suppression d'un groupe ou d'un utilisateur du groupe, -> groupe existant/ utilisateur existant / droit de modification/suppression (si utilisateur est l'owner du groupe) -> ???
+- ajout du nouveau groupe à la liste après création réussie -> ???
+
+**Messages**
+- historique des messages -> Liu
+- lien table messages en attente et liste d'utilisateurs connectés > envoi des messages et modifications dans la table -> ???
+- définir les protocoles plus en détails/ comment les paquetages sont divisés -> ???
+
+**Users**
+- login utilisateur (réparer les erreurs) -> Nam
+- quand authentification réussie, connection avec application message (chat form) -> Anna / Nam
+- liste de users connectés -> Anna
+- liste de users déconnectés -> Anna
+- modification dans la bdd quand utilisateur supprimé -> ???
+
+**Serveur**
+- (OK) création tables dans bases de données côté serveur (messages en attente, groupes et users, et table de jointure groupUsers) -> Maxine
+- résoudre les problèmes du serveur (apparus ce matin) -> en pause en attendant la réparation du login
+
+---
+
+#### Questionnements
+
+- Comment les paquets sont traités / divisés pour extraire les différentes infos utiles
+- 
+
+---
+
+#### Problèmes rencontrés (et leurs solutions):
+
+- serveur : Lorsque la base de données a été intégré, exception soulevée qui empêche l'envoi de messages
+- 
