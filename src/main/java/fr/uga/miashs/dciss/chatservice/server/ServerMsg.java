@@ -157,6 +157,8 @@ public class ServerMsg {
 	}
 
 	public static void main(String[] args) throws IOException {
+		// Initialize the database
+		DatabaseManager.initAllDatabases();
 		ServerMsg s = new ServerMsg(1666);
 		s.start();
 	}
