@@ -93,6 +93,9 @@ public class ServerMsg {
 	// Methode utilisée pour savoir quoi faire d'un paquet
 	// reçu par le serveur
 	public void processPacket(Packet p) {
+		System.out.println("Processing message from " + p.srcId + " to " + p.destId);//test line Anna
+		System.out.println("[SERVER] Packet received: from " + p.srcId + " to " + p.destId);//test line Anna
+		
 		PacketProcessor pp = null;
 		if (p.destId < 0) { // message de groupe
 			// can be send only if sender is member

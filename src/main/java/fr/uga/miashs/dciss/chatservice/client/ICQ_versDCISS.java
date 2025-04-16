@@ -110,6 +110,14 @@ public class ICQ_versDCISS {
 		//start session
 		client.startSession();
 		
+		//msg in dest window
+		client.addMessageListener(p -> {
+		    String msg = new String(p.data, StandardCharsets.UTF_8);
+		    String display = p.srcId + " dit : " + msg + "\n";
+		    EventQueue.invokeLater(() -> textArea_msgs.append(display));
+		});
+
+		
 		//for the case when we are not connected anymore
 		client.addConnectionListener(active -> {
 		    if (!active) {
