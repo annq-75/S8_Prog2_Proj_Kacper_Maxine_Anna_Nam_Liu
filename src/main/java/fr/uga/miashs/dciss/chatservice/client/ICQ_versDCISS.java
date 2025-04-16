@@ -36,6 +36,7 @@ public class ICQ_versDCISS {
 	private ClientMsg client;
 	private JTextArea textArea_msgs;
 
+
 	/**
 	 * Launch the application.
 	 */
@@ -56,6 +57,13 @@ public class ICQ_versDCISS {
 	 * Create the application.
 	 */
 	public ICQ_versDCISS() {
+	    try {
+	        initialize();
+	    } catch (UnknownHostException e) {
+	        e.printStackTrace();
+	        // show err:
+	        JOptionPane.showMessageDialog(null, "Connection to server is impossible.");
+	    }
 	    try {
 	        initialize();
 	    } catch (UnknownHostException e) {

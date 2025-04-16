@@ -53,7 +53,35 @@ import java.util.Set;
 			 // FR : Envoi des groupes de l'utilisateur -- RU: Список групп, где пользователь участник
 			 sendUserGroups(p.srcId);
  
-		 } else {
+		 } else if (type == 5) {
+			 //suppression de groupe
+			 removeGroup(p.srcId, buf);
+			 //on passe en paramètres l'id de l'utilisateur qui essai de faire l'action
+			 // on envoie en paramètre aussi la partie du paquet qui contient l'information sur le groupe	 
+		 } else if(type == 6){
+			 // ajout utilisateurs
+			 addMember(p.srcId, null, null);
+		 } else if(type == 7) {
+			 //suppression d'utilisateurs
+			 removeMember(null, null, null);
+		 } else if(type == 8) {
+			 //envoie de message -> à créer dans la classe clientMsg?? ou userMsg??
+			 //sendMessage(string message, int target/UserMsg target??)
+		 } else if(type == 9) {
+			 //envoie de message stocké -> packet envoyé par le serveur
+			 // à créer dans le serveur
+		 } else if(type == 10) {
+			 //enregistrement de l'historique des messages
+			 // à créer dans le clientMsg, c'est le client qui va l'appeler
+		 }else if(type == 11) {
+			 //stockage des messages envoyés (mais non recus)
+		 }
+		 elseif(type == 12){
+			// Version-liu 
+			                // FR : Envoi des groupes créés par l'utilisateur -- RU: Список групп, созданных пользователем
+			                sendCreatedGroups(p.srcId);
+		 } else{
+
 			 // FR : Commande inconnue -- RU: Неизвестный тип команды
 			 LOG.warning("Server message of type=" + type + " not handled by processor");
 		 }
@@ -138,5 +166,82 @@ import java.util.Set;
 			 destUser.process(response);
 		 }
 	 }
+	 
+	 //--------------------------------------------------------------------
+	 // faut prendre en compte la lecture de paquets -> décider si on lit les informations
+	 // du paquet dans la méthode ou dans les if (et on les passe en parametre)?
+	 
+	 //----------------méthode suppression de groupe
+	 public void removeGroup(int userId, ByteBuffer data) {//on redéfinit la méthode remove à partir de "ServerMsg.java"
+			int id = data.getInt();
+//			if(userId == ownerId) vérification si cest un propriétaire du groupe
+			server.removeGroup(id);
+		}
+	 
+	 //-----------------méthode ajout membre dans groupe--------------
+	 public void addMember(int userId, GroupMsg groupe, UserMsg user) {
+		 //if(ownerId == p.srcId && groupe.get(user)==null) -> vérifier si 
+		 // l'utilisateur est un propriétaire et que l'utilisateur n'est pas dans le groupe
+		 groupe.addMember(user);
+	 }
+	 
+	 
+	 ////------------------méthode suppression de membre du groupe-------------
+	 public void removeMember(UserMsg user, UserMsg target, GroupMsg groupe) {
+		 if (user == target){//l'utilisateur veut enlever lui meme
+			 groupe.removeMember(target);
+			 //if user == owner -> removeGroup();
+		 }else {
+			 //if (user == owner) -> verification si l'utilisateur est aussi un usager
+			 groupe.removeMember(target);
+		 }
+		 
+		
+	 }
+	 
+	 // ----------------------méthode envoie de message
+	 public void sendMessage(UserMsg target, GroupMsg groupTarget, Packet message) {
+		 //possbilité que target ou group target soit nul selon si on envoie a un groupe ou une personne en particulier??
+		 if(target == null) {//cas ou on envoie à un groupe
+			 groupTarget.process(message);
+		 }else {
+			 
+		 }
+	 }
+	 
+	 //----------------------méthode envoie de message stocké------------------
+	 public void sendStock() {
+		 // recherche périodique dans la base de données à chaque reconnexion des utilisateurs
+		 //-> utilisateur(1) se connecte -> le serveur recherche dans la base de données
+		 // les messages qui ne n'ont pas été envoyés -> si il y en a ou le destId == userId alors on envoie
+		 // -> utilisation de 
+	 }
+
+	 //----------------------les méthodes de liu-----------------------------
+	 //Version- Liu
+	     // ----------- Envoi des groupes créés par l'utilisateur -----------
+	     private void sendCreatedGroups(int userId) {
+	         Set<GroupMsg> createdGroups = new HashSet<>();
+	 
+	         // 遍历服务器上的所有群组
+	         for (GroupMsg group : server.getGroups().values()) {
+	             if (group.getOwner().getId() == userId) {
+	                 createdGroups.add(group);
+	             }
+	         }
+	 
+	  // 用ByteBuffer打包
+	         ByteBuffer buffer = ByteBuffer.allocate(4 + createdGroups.size() * 4);
+	         buffer.putInt(createdGroups.size());
+	         for (GroupMsg g : createdGroups) {
+	             buffer.putInt(g.getId());
+	         }
+	 
+	 Packet response = new Packet(ServerMsg.SERVER_CLIENTID, -2, buffer.array());
+	         UserMsg destUser = server.getUser(userId);
+	         if (destUser != null) {
+	             destUser.process(response);
+	         }
+	 
  }
  
