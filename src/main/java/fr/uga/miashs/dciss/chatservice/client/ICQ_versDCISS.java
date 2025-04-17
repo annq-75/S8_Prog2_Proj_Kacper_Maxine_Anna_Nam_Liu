@@ -83,6 +83,7 @@ public class ICQ_versDCISS {
 		//и рандомно выбрать из него юзера, который еще не коннектед
 		//потом передать id этого юзера в х
 		
+		
 		//client = new ClientMsg(x,"localhost", 1666); 
 		//Un objet ClientMsg est créé, qui se connecte au serveur à l’adresse localhost 
 		//(c’est-à-dire sur le même ordinateur) et au port 1666.
