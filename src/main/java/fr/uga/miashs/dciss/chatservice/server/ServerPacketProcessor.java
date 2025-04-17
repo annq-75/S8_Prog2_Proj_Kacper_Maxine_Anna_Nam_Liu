@@ -76,10 +76,10 @@ import java.util.Set;
 		 }else if(type == 11) {
 			 //stockage des messages envoyés (mais non recus)
 		 }
-		 elseif(type == 12){
+		 else if(type == 12){
 			// Version-liu 
-			                // FR : Envoi des groupes créés par l'utilisateur -- RU: Список групп, созданных пользователем
-			                sendCreatedGroups(p.srcId);
+			 // FR : Envoi des groupes créés par l'utilisateur -- RU: Список групп, созданных пользователем
+			sendCreatedGroups(p.srcId);
 		 } else{
 
 			 // FR : Commande inconnue -- RU: Неизвестный тип команды

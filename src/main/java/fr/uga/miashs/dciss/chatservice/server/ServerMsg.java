@@ -39,6 +39,7 @@ public class ServerMsg {
 	
 	// MessageHistory-Liu
 	private MessageHistory messageHistory = new MessageHistory();
+	
 
 
 	
@@ -57,12 +58,12 @@ public class ServerMsg {
 		executor = Executors.newCachedThreadPool();
 	}
 
-	public GroupMsg createGroup(int ownerId) {
+	public GroupMsg createGroup(int ownerId, String name) {
 		UserMsg owner = users.get(ownerId);
 		if (owner == null)
 			throw new ServerException("User with id=" + ownerId + " unknown. Group creation failed.");
 		int id = nextGroupId.getAndDecrement();
-		GroupMsg res = new GroupMsg(id, owner);
+		GroupMsg res = new GroupMsg(id, owner, name);
 		groups.put(id, res);
 		LOG.info("Group " + res.getId() + " created");
 		return res;
@@ -94,34 +95,14 @@ public class ServerMsg {
 	// reçu par le serveur
 	public void processPacket(Packet p) {
 		PacketProcessor pp = null;
-		if (p.destId < 0) { // message de groupe
-			// can be send only if sender is member
-			UserMsg sender = users.get(p.srcId);
-			GroupMsg g = groups.get(p.destId);
-			if (g.getMembers().contains(sender))
-				pp = g;
-		} else if (p.destId > 0) { // message entre utilisateurs
-			pp = users.get(p.destId);
-		} else { // message de gestion pour le serveur
-			pp = sp;
-		}
+		sp.process(p);
 		
-		// Version-Liu
-		if (pp != null) {
-			pp.process(p);
-			
-			// 保存消息历史，假设目标用户在线
-			messageHistory.addMessage(
-				p.destId,
-				new MessageHistory.MessageRecord(p.srcId, p.destId, new String(p.data))
-			);
 		}
 		
 		
 		// if (pp != null) {
 		// 	pp.process(p);
 		// }
-	}
 
 	public void start() {
 		started = true;
