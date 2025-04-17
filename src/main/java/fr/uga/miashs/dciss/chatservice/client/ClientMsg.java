@@ -138,7 +138,7 @@ public class ClientMsg {
 	 * @param destId the destinatiion id
 	 * @param data   the data to be sent
 	 */
-	public void sendPacket(int destId, byte[] data) {
+	/*public void sendPacket(int destId, byte[] data) {
 		try {
 			synchronized (dos) {
 				dos.writeInt(destId);
@@ -151,7 +151,24 @@ public class ClientMsg {
 			closeSession();
 		}
 		
+	}*/
+	
+	public void sendPacket(int destId, byte[] data) {
+	    try {
+	        synchronized (dos) {
+	            System.out.println("[CLIENT → SERVER] Sending packet to: " + destId + ", bytes: " + Arrays.toString(data));
+	            dos.writeInt(destId);
+	            dos.writeInt(data.length);
+	            dos.write(data);
+	            dos.flush();
+	        }
+	    } catch (IOException e) {
+	        System.err.println("[CLIENT] Failed to send packet to " + destId);
+	        e.printStackTrace();
+	        closeSession();
+	    }
 	}
+
 
 	/**
 	 * Start the receive loop. Has to be called only once.

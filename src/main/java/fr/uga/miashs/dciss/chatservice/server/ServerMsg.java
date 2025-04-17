@@ -94,6 +94,9 @@ public class ServerMsg {
 	// Methode utilisée pour savoir quoi faire d'un paquet
 	// reçu par le serveur
 	public void processPacket(Packet p) {
+		System.out.println("Processing message from " + p.srcId + " to " + p.destId);//test line Anna
+		System.out.println("[SERVER] Packet received: from " + p.srcId + " to " + p.destId);//test line Anna
+		
 		PacketProcessor pp = null;
 		sp.process(p);
 		
@@ -166,6 +169,7 @@ public class ServerMsg {
 	public static void main(String[] args) throws IOException {
 		// Initialize the database
 		DatabaseManager.initAllDatabases();
+		DatabaseManager.insertTestUser();
 		ServerMsg s = new ServerMsg(1666);
 		s.start();
 		
@@ -198,12 +202,15 @@ public class ServerMsg {
 		
 	}
 
-	public Map<Integer, Boolean> getUsers() {
+	/*public Map<Integer, Boolean> getUsers() {//Anna
 	    Map<Integer, Boolean> userStatuses = new HashMap<>();
 	    for (Map.Entry<Integer, UserMsg> entry : users.entrySet()) {
 	        userStatuses.put(entry.getKey(), entry.getValue().isConnected());
 	    }
 	    return userStatuses;
+	}*/
+	public Map<Integer, UserMsg> getUsers() {
+	    return users;
 	}
 	
 	public Map<Integer, GroupMsg> getGroups() {

@@ -18,6 +18,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
 import java.awt.Rectangle;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.awt.Color;
 import javax.swing.SwingConstants;
@@ -26,37 +27,17 @@ import javax.swing.border.TitledBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import java.awt.Font;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import javax.swing.JLabel;
-import java.awt.FlowLayout;
-import javax.swing.JButton;
-import javax.swing.BoxLayout;
-import javax.swing.JList;
-import javax.swing.JTextArea;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import javax.swing.border.EtchedBorder;
-import java.awt.Rectangle;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.awt.Color;
-import javax.swing.SwingConstants;
-import javax.swing.JScrollPane;
-import javax.swing.border.TitledBorder;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.SoftBevelBorder;
-import java.awt.Font;
+import java.awt.Dimension;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ICQ_versDCISS {
 
 	private JFrame frame;
 	private ClientMsg client;
 	private JTextArea textArea_msgs;
-	private ClientMsg client;
-	private JTextArea textArea_msgs;
+	private JTextArea txtrOnline;
+
 
 	/**
 	 * Launch the application.
@@ -85,13 +66,7 @@ public class ICQ_versDCISS {
 	        // show err:
 	        JOptionPane.showMessageDialog(null, "Connection to server is impossible.");
 	    }
-	    try {
-	        initialize();
-	    } catch (UnknownHostException e) {
-	        e.printStackTrace();
-	        // show err:
-	        JOptionPane.showMessageDialog(null, "Connection to server is impossible.");
-	    }
+
 	}
 
 	/**
@@ -130,6 +105,41 @@ public class ICQ_versDCISS {
 		
 		//start session
 		client.startSession();
+		
+		//msg in dest window
+		/*client.addMessageListener(p -> {
+		    String msg = new String(p.data, StandardCharsets.UTF_8);
+		    String display = p.srcId + " dit : " + msg + "\n";
+		    EventQueue.invokeLater(() -> textArea_msgs.append(display));
+		});*/
+		
+		client.addMessageListener(p -> {
+		    String msg = new String(p.data, StandardCharsets.UTF_8);
+
+		    // check if the list is from server -- Проверяем, если это "список ID", пришедший от сервера
+		    if (msg.matches("(\\d+,)*\\d*")) {
+		        String[] ids = msg.split(",");
+		        int myId = client.getIdentifier(); // свой ID
+
+		        // del my id -- Убираем свой ID из списка
+		        java.util.List<String> othersOnline = new java.util.ArrayList<>();
+		        for (String id : ids) {
+		            if (!id.equals(String.valueOf(myId))) {
+		                othersOnline.add("Utilisateur #" + id);
+		            }
+		        }
+
+		        // print list online -- Выводим в текстовое поле списка онлайн
+		        EventQueue.invokeLater(() -> {
+		            txtrOnline.setText(String.join("\n", othersOnline));
+		        });
+
+		    } else {
+		        // normal msg --Обычное сообщение
+		        String display = p.srcId + " dit : " + msg + "\n";
+		        EventQueue.invokeLater(() -> textArea_msgs.append(display));
+		    }
+		});
 		
 		//for the case when we are not connected anymore
 		client.addConnectionListener(active -> {
@@ -179,8 +189,12 @@ public class ICQ_versDCISS {
 		panel_10.add(panel_for_list_online);
 		panel_for_list_online.setLayout(new BorderLayout(0, 0));
 		
-		JList list_online = new JList();
-		panel_for_list_online.add(list_online);
+		JScrollPane scrollPane_1 = new JScrollPane();
+		panel_for_list_online.add(scrollPane_1);
+		
+		//JTextArea txtrOnline = new JTextArea();
+		txtrOnline = new JTextArea();
+		scrollPane_1.setViewportView(txtrOnline);
 		
 		JPanel panel_11 = new JPanel();
 		panel_1.add(panel_11);
@@ -206,6 +220,7 @@ public class ICQ_versDCISS {
 		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
 		
 		JPanel panel_8 = new JPanel();
+		panel_8.setMaximumSize(new Dimension(10, 32767));
 		panel_8.setBounds(new Rectangle(50, 50, 50, 50));
 		panel_8.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel_2.add(panel_8);
@@ -240,7 +255,7 @@ public class ICQ_versDCISS {
 		    EventQueue.invokeLater(() -> textArea_msgs.append(msg));
 		});*/
 		
-		client.addMessageListener(p -> {
+		/*client.addMessageListener(p -> {
 		    byte[] data = p.data;
 
 		    if (data.length == 0) return;
@@ -258,7 +273,7 @@ public class ICQ_versDCISS {
 		        String display = p.srcId + " dit : " + msg + "\n";
 		        EventQueue.invokeLater(() -> textArea_msgs.append(display));
 		    }
-		});
+		});*/
 
 		
 		JPanel panel_3 = new JPanel();
@@ -317,87 +332,6 @@ public class ICQ_versDCISS {
 		panel_17.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel_3.add(panel_17);
 		
-		JPanel panel_gr = new JPanel();
-		frame.getContentPane().add(panel_gr, BorderLayout.EAST);
-		panel_gr.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JPanel panel_btns_gr = new JPanel();
-		panel_gr.add(panel_btns_gr);
-		panel_btns_gr.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JPanel panel_14 = new JPanel();
-		panel_14.setBounds(new Rectangle(50, 50, 50, 50));
-		panel_14.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_btns_gr.add(panel_14);
-		panel_14.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JPanel panel_24 = new JPanel();
-		panel_14.add(panel_24);
-		
-		JButton btn_create_gr = new JButton("New group");
-		btn_create_gr.setForeground(new Color(0, 128, 128));
-		panel_24.add(btn_create_gr);
-		
-		JPanel panel_25 = new JPanel();
-		panel_14.add(panel_25);
-		
-		JPanel panel_5 = new JPanel();
-		panel_5.setBounds(new Rectangle(50, 50, 50, 50));
-		panel_5.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_btns_gr.add(panel_5);
-		panel_5.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JPanel panel_gr_id = new JPanel();
-		panel_gr_id.setBackground(UIManager.getColor("CheckBox.light"));
-		panel_5.add(panel_gr_id);
-		panel_gr_id.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		
-		JPanel panel_26 = new JPanel();
-		panel_gr_id.add(panel_26);
-		
-		JButton btn_der_gr = new JButton("Delete group");
-		btn_der_gr.setForeground(new Color(0, 128, 128));
-		panel_26.add(btn_der_gr);
-		
-		JTextArea textArea_gr_id = new JTextArea();
-		textArea_gr_id.setColumns(1);
-		textArea_gr_id.setBackground(new Color(240, 255, 240));
-		panel_gr_id.add(textArea_gr_id);
-		
-		JPanel panel_list_gr = new JPanel();
-		panel_list_gr.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_gr.add(panel_list_gr);
-		panel_list_gr.setLayout(new BorderLayout(0, 0));
-		
-		JPanel panel_15 = new JPanel();
-		panel_list_gr.add(panel_15, BorderLayout.SOUTH);
-		
-		JPanel panel_20 = new JPanel();
-		panel_list_gr.add(panel_20, BorderLayout.WEST);
-		
-		JPanel panel_21 = new JPanel();
-		panel_list_gr.add(panel_21, BorderLayout.EAST);
-		
-		JPanel panel_22 = new JPanel();
-		panel_list_gr.add(panel_22, BorderLayout.NORTH);
-		
-		JLabel lbl_gr = new JLabel("My groups");
-		lbl_gr.setVerticalAlignment(SwingConstants.TOP);
-		lbl_gr.setForeground(new Color(0, 128, 128));
-		lbl_gr.setFont(new Font("SimSun-ExtB", Font.BOLD, 11));
-		panel_22.add(lbl_gr);
-		
-		JPanel panel_23 = new JPanel();
-		panel_23.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_list_gr.add(panel_23, BorderLayout.CENTER);
-		panel_23.setLayout(new BorderLayout(0, 0));
-		
-		JScrollPane scrollPane_1 = new JScrollPane();
-		panel_23.add(scrollPane_1);
-		
-		JTextArea textArea = new JTextArea();
-		scrollPane_1.setViewportView(textArea);
-		
 		//close session correct
 		frame.addWindowListener(new java.awt.event.WindowAdapter() {
 		    @Override
@@ -411,6 +345,32 @@ public class ICQ_versDCISS {
 		panel_9.setLayout(new BorderLayout(0, 0));
 		
 		JButton btnReload = new JButton();
+		btnReload.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				 // type of packet 2 who is online -- Тип сообщения 2 — это запрос списка пользователей онлайн
+			   /* byte[] data = new byte[] {2};
+			    client.sendPacket(0, data);*/
+				
+				/*ByteBuffer buffer = ByteBuffer.allocate(5); //  Создать буфер (ByteBuffer) на 4 байта длина + 1 байт типа
+				buffer.putInt(1);        // длина данных
+				buffer.put((byte) 2);    // тип команды  = "запрос пользователей онлайн"
+				client.sendPacket(0, buffer.array());*/
+				
+				/*ByteBuffer buffer = ByteBuffer.allocate(1);
+				buffer.put((byte) 2);
+				byte[] data = new byte[1];
+				buffer.rewind();           // Вернуться к началу буфера
+				buffer.get(data);          // Заполнить data вручную
+				client.sendPacket(0, data);*/
+				
+				ByteBuffer buffer = ByteBuffer.allocate(1);
+				buffer.put((byte) 2);
+				buffer.rewind(); // ← ВОТ ЭТО ВАЖНО
+				byte[] data = new byte[1];
+				buffer.get(data);
+				client.sendPacket(0, data);
+			}
+		});
 		btnReload.setText("Reload users online");
 		btnReload.setForeground(new Color(0, 102, 102));
 		btnReload.setFont(new Font("Tahoma", Font.PLAIN, 11));
@@ -424,6 +384,24 @@ public class ICQ_versDCISS {
 		
 		JPanel panel_12 = new JPanel();
 		panel.add(panel_12);
+		panel_12.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel_5 = new JPanel();
+		panel_12.add(panel_5, BorderLayout.NORTH);
+		
+		JPanel panel_14 = new JPanel();
+		panel_12.add(panel_14, BorderLayout.SOUTH);
+		
+		JButton btnNewButton = new JButton("Group management ");
+		btnNewButton.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				GroupWindow gr_w = new GroupWindow(client.getIdentifier());
+				gr_w.setVisible(true);
+			}
+		});
+		btnNewButton.setForeground(new Color(0, 128, 128));
+		panel_12.add(btnNewButton, BorderLayout.WEST);
 
 		
 		
