@@ -30,6 +30,7 @@ import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.Point;
 
 public class ICQ_versDCISS {
 
@@ -93,6 +94,8 @@ public class ICQ_versDCISS {
 		
 		
 		JPanel panel = new JPanel();
+		panel.setBounds(new Rectangle(30, 30, 30, 30));
+		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		frame.getContentPane().add(panel, BorderLayout.NORTH);
 		panel.setLayout(new GridLayout(0, 2, 0, 0));
 		
@@ -180,6 +183,8 @@ public class ICQ_versDCISS {
 		panel_nickshow.add(textArea_SendTO);
 		
 		JPanel panel_1 = new JPanel();
+		panel_1.setBounds(new Rectangle(30, 30, 30, 30));
+		panel_1.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		frame.getContentPane().add(panel_1, BorderLayout.WEST);
 		panel_1.setLayout(new GridLayout(0, 1, 0, 0));
 		
@@ -196,6 +201,9 @@ public class ICQ_versDCISS {
 		
 		//JTextArea txtrOnline = new JTextArea();
 		txtrOnline = new JTextArea();
+		txtrOnline.setLocation(new Point(2, 2));
+		txtrOnline.setFont(new Font("Sans Serif Collection", Font.PLAIN, 13));
+		txtrOnline.setForeground(new Color(0, 128, 0));
 		scrollPane_1.setViewportView(txtrOnline);
 		
 		JLabel lbl_online = new JLabel("     Online     ");
@@ -206,6 +214,8 @@ public class ICQ_versDCISS {
 		panel_10.add(lbl_online, BorderLayout.NORTH);
 		
 		JPanel panel_2 = new JPanel();
+		panel_2.setBounds(new Rectangle(30, 30, 30, 30));
+		panel_2.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		frame.getContentPane().add(panel_2, BorderLayout.CENTER);
 		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
 		
@@ -232,41 +242,10 @@ public class ICQ_versDCISS {
 		JScrollPane scrollPane = new JScrollPane(textArea_msgs);
 		panel_2.add(scrollPane);
 		
-		/*client.addMessageListener(p -> {
-		    String message = p.srcId + " says to " + p.destId + ": " + new String(p.data) + "\n";
-		    EventQueue.invokeLater(() -> textArea_msgs.append(message)); 
-		    //EventQueue.invokeLater() est utilisé pour mettre à jour 
-		    //l’interface utilisateur dans le thread de l’interface graphique (UI).
-		//------------------------------------
-		});*/
-		
-		/*client.addMessageListener(p -> {
-		    String msg = p.srcId + " says: " + new String(p.data) + "\n";
-		    EventQueue.invokeLater(() -> textArea_msgs.append(msg));
-		});*/
-		
-		/*client.addMessageListener(p -> {
-		    byte[] data = p.data;
-
-		    if (data.length == 0) return;
-
-		    String msg = new String(data, StandardCharsets.UTF_8);
-
-		    // List online -- если это список онлайн — например, строка: "1,2,3,"
-		    if (msg.matches("(\\d+[,])*")) {
-		        String[] ids = msg.split(",");
-		        EventQueue.invokeLater(() -> {
-		            list_online.setListData(ids); // показываем в JList
-		        });
-		    } else {
-		        // usual mesge  -- обычное сообщение
-		        String display = p.srcId + " dit : " + msg + "\n";
-		        EventQueue.invokeLater(() -> textArea_msgs.append(display));
-		    }
-		});*/
-
 		
 		JPanel panel_3 = new JPanel();
+		panel_3.setBounds(new Rectangle(30, 30, 30, 30));
+		panel_3.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		frame.getContentPane().add(panel_3, BorderLayout.SOUTH);
 		panel_3.setLayout(new GridLayout(0, 1, 0, 0));
 		
@@ -386,7 +365,7 @@ public class ICQ_versDCISS {
 		btnNewButton.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				GroupWindow gr_w = new GroupWindow(client.getIdentifier());
+				GroupWindow gr_w = new GroupWindow(client);
 				gr_w.setVisible(true);
 			}
 		});

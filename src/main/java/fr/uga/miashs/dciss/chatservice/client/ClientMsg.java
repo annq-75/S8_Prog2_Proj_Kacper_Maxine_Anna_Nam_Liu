@@ -40,6 +40,7 @@ public class ClientMsg {
 
 	private List<MessageListener> mListeners;
 	private List<ConnectionListener> cListeners;
+	protected GroupWindow groupWindow;
 
 	/**
 	 * Create a client with an existing id, that will connect to the server at the
@@ -200,6 +201,20 @@ public class ClientMsg {
 		s = null;
 		notifyConnectionListeners(false);
 	}
+	
+	//-----------------for window interface group -- Anna---------------//
+	public void setGroupWindow(GroupWindow gw) {
+	    this.groupWindow = gw;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	//=============================================Ajout menu - Version Liu============================================================
         //Ajout un menu pour demander au user s'il veux créer un groupe
@@ -300,7 +315,7 @@ public class ClientMsg {
             // add a dummy listener that print the content of message as a string
             //c.addMessageListener(p -> System.out.println(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
             
-            c.addMessageListener(p -> {
+            c.addMessageListener(p -> {//list de online users
                 try {
                     ByteArrayInputStream bis = new ByteArrayInputStream(p.data);
                     DataInputStream dis = new DataInputStream(bis);

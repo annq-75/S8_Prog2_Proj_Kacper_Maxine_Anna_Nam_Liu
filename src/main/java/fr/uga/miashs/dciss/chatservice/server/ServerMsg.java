@@ -259,8 +259,8 @@ public class ServerMsg {
 	    return groups;
 	}
 	
-	/*public int getRegisterUsers() {//--anna
-		DatabaseManager.getRegisterUsers;
-	}*/
+	public int[] getRegisterUsers() {//--anna
+		return DatabaseManager.getRegisteredUsers();
+	}
 	
 }
