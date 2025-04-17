@@ -43,7 +43,7 @@ public class GroupWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public GroupWindow(int client_id) {
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//я поняла EXIT_ON_CLOSE на DISPOSE_ON_CLOSE чтобы вся программа не закрывалась, а только окно
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//я поменяла EXIT_ON_CLOSE на DISPOSE_ON_CLOSE чтобы вся программа не закрывалась, а только окно
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -118,6 +118,11 @@ public class GroupWindow extends JFrame {
 		panel_13.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel_13.setBounds(new Rectangle(30, 30, 30, 30));
 		panel_5.add(panel_13);
+		panel_13.setLayout(new GridLayout(0, 2, 0, 0));
+		
+		JLabel lblNewLabel = new JLabel("Nmb of members");
+		lblNewLabel.setForeground(new Color(0, 128, 128));
+		panel_13.add(lblNewLabel);
 		
 		textField_1 = new JTextField();
 		panel_13.add(textField_1);

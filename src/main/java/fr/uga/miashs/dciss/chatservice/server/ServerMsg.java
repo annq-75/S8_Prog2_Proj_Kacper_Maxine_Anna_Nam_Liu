@@ -221,12 +221,15 @@ public class ServerMsg {
 		
 	}
 
-	public Map<Integer, Boolean> getUsers() {//Anna
+	/*public Map<Integer, Boolean> getUsers() {//Anna
 	    Map<Integer, Boolean> userStatuses = new HashMap<>();
 	    for (Map.Entry<Integer, UserMsg> entry : users.entrySet()) {
 	        userStatuses.put(entry.getKey(), entry.getValue().isConnected());
 	    }
 	    return userStatuses;
+	}*/
+	public Map<Integer, UserMsg> getUsers() {
+	    return users;
 	}
 	
 	public Map<Integer, GroupMsg> getGroups() {

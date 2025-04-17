@@ -18,6 +18,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
 import java.awt.Rectangle;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.awt.Color;
 import javax.swing.SwingConstants;
@@ -35,6 +36,7 @@ public class ICQ_versDCISS {
 	private JFrame frame;
 	private ClientMsg client;
 	private JTextArea textArea_msgs;
+	private JTextArea txtrOnline;
 
 
 	/**
@@ -64,13 +66,7 @@ public class ICQ_versDCISS {
 	        // show err:
 	        JOptionPane.showMessageDialog(null, "Connection to server is impossible.");
 	    }
-	    try {
-	        initialize();
-	    } catch (UnknownHostException e) {
-	        e.printStackTrace();
-	        // show err:
-	        JOptionPane.showMessageDialog(null, "Connection to server is impossible.");
-	    }
+
 	}
 
 	/**
@@ -111,12 +107,39 @@ public class ICQ_versDCISS {
 		client.startSession();
 		
 		//msg in dest window
-		client.addMessageListener(p -> {
+		/*client.addMessageListener(p -> {
 		    String msg = new String(p.data, StandardCharsets.UTF_8);
 		    String display = p.srcId + " dit : " + msg + "\n";
 		    EventQueue.invokeLater(() -> textArea_msgs.append(display));
-		});
+		});*/
+		
+		client.addMessageListener(p -> {
+		    String msg = new String(p.data, StandardCharsets.UTF_8);
 
+		    // check if the list is from server -- Проверяем, если это "список ID", пришедший от сервера
+		    if (msg.matches("(\\d+,)*\\d*")) {
+		        String[] ids = msg.split(",");
+		        int myId = client.getIdentifier(); // свой ID
+
+		        // del my id -- Убираем свой ID из списка
+		        java.util.List<String> othersOnline = new java.util.ArrayList<>();
+		        for (String id : ids) {
+		            if (!id.equals(String.valueOf(myId))) {
+		                othersOnline.add("Utilisateur #" + id);
+		            }
+		        }
+
+		        // print list online -- Выводим в текстовое поле списка онлайн
+		        EventQueue.invokeLater(() -> {
+		            txtrOnline.setText(String.join("\n", othersOnline));
+		        });
+
+		    } else {
+		        // normal msg --Обычное сообщение
+		        String display = p.srcId + " dit : " + msg + "\n";
+		        EventQueue.invokeLater(() -> textArea_msgs.append(display));
+		    }
+		});
 		
 		//for the case when we are not connected anymore
 		client.addConnectionListener(active -> {
@@ -167,31 +190,12 @@ public class ICQ_versDCISS {
 		panel_for_list_online.setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane_1 = new JScrollPane();
-		panel_for_list_online.add(scrollPane_1, BorderLayout.NORTH);
+		panel_for_list_online.add(scrollPane_1);
 		
-		JTextArea txtrOnline = new JTextArea();
+		//JTextArea txtrOnline = new JTextArea();
+		txtrOnline = new JTextArea();
 		scrollPane_1.setViewportView(txtrOnline);
 		
-		/*client.addMessageListener(p -> {
-		    byte[] data = p.data;
-
-		    if (data.length == 0) return;
-
-		    String msg = new String(data, StandardCharsets.UTF_8);
-
-		    // List online -- если это список онлайн — например, строка: "1,2,3,"
-		    if (msg.matches("(\\d+[,])*")) {
-		        String[] ids = msg.split(",");
-		        EventQueue.invokeLater(() -> {
-		            list_online.setListData(ids); // показываем в JList
-		        });
-		    } else {
-		        // usual mesge  -- обычное сообщение
-		        String display = p.srcId + " dit : " + msg + "\n";
-		        EventQueue.invokeLater(() -> textArea_msgs.append(display));
-		    }
-		});
-		*/
 		JPanel panel_11 = new JPanel();
 		panel_1.add(panel_11);
 		panel_11.setLayout(new GridLayout(0, 1, 0, 0));
@@ -341,6 +345,32 @@ public class ICQ_versDCISS {
 		panel_9.setLayout(new BorderLayout(0, 0));
 		
 		JButton btnReload = new JButton();
+		btnReload.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				 // type of packet 2 who is online -- Тип сообщения 2 — это запрос списка пользователей онлайн
+			   /* byte[] data = new byte[] {2};
+			    client.sendPacket(0, data);*/
+				
+				/*ByteBuffer buffer = ByteBuffer.allocate(5); //  Создать буфер (ByteBuffer) на 4 байта длина + 1 байт типа
+				buffer.putInt(1);        // длина данных
+				buffer.put((byte) 2);    // тип команды  = "запрос пользователей онлайн"
+				client.sendPacket(0, buffer.array());*/
+				
+				/*ByteBuffer buffer = ByteBuffer.allocate(1);
+				buffer.put((byte) 2);
+				byte[] data = new byte[1];
+				buffer.rewind();           // Вернуться к началу буфера
+				buffer.get(data);          // Заполнить data вручную
+				client.sendPacket(0, data);*/
+				
+				ByteBuffer buffer = ByteBuffer.allocate(1);
+				buffer.put((byte) 2);
+				buffer.rewind(); // ← ВОТ ЭТО ВАЖНО
+				byte[] data = new byte[1];
+				buffer.get(data);
+				client.sendPacket(0, data);
+			}
+		});
 		btnReload.setText("Reload users online");
 		btnReload.setForeground(new Color(0, 102, 102));
 		btnReload.setFont(new Font("Tahoma", Font.PLAIN, 11));
