@@ -14,6 +14,11 @@ public class DatabaseManager {
 			+ "idGroupUser INTEGER NOT NULL PRIMARY KEY, " + "idGroup INTEGER NOT NULL, " + "idUser INTEGER NOT NULL)";
 	private static final String sqlGroups = "CREATE TABLE IF NOT EXISTS groups ("
 			+ "idGroup INTEGER NOT NULL PRIMARY KEY, " + "idOwner INTEGER NOT NULL)";
+	private static final String sqlTempGroupClients = "CREATE TABLE IF NOT EXISTS tempGroupClients ("
+			+ "idGroupClient INTEGER NOT NULL PRIMARY KEY, " + "idGroup INTEGER NOT NULL, "
+			+ "idClient INTEGER NOT NULL)";
+	private static final String sqlTempGroups = "CREATE TABLE IF NOT EXISTS tempGroups ("
+			+ "idGroup INTEGER NOT NULL PRIMARY KEY, " + "idOwner INTEGER NOT NULL)";
 	private static final String sqlMsgToBeServed = "CREATE TABLE IF NOT EXISTS msgToBeServed ("
 			+ "id INTEGER PRIMARY KEY AUTOINCREMENT, " + "idReceiver INTEGER NOT NULL, " + "idSender INTEGER NOT NULL, "
 			+ "content TEXT, " + "delivered BOOLEAN NOT NULL DEFAULT 0)"; // 1/yes/true if message is sent already (i.e.
@@ -55,6 +60,8 @@ public class DatabaseManager {
 		initDatabase(sqlGroups);
 		initDatabase(sqlMsgToBeServed);
 		// initDatabase(sqlMsgSent);
+		initDatabase(sqlTempGroupClients);
+		initDatabase(sqlTempGroups);
 	}
 
 	// Xác thực người dùng
@@ -99,14 +106,14 @@ public class DatabaseManager {
 	}
 
 	// Thêm tài khoản test
-	public static void insertTestUser() {
+	public static void insertTestUser(String username, String password) {
 		String sql = "INSERT OR IGNORE INTO users(username, password) VALUES (?, ?)";
 		try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-			stmt.setString(1, "liu");
-			stmt.setString(2, "1111");
+			stmt.setString(1, username);
+			stmt.setString(2, password);
 			stmt.executeUpdate();
-			System.out.println("[DB] Test user 'liu' inserted.");
+			System.out.println("[DB] Test user '" + username + "' inserted.");
 		} catch (SQLException e) {
 			System.err.println("[DB] Failed to insert test user: " + e.getMessage());
 			e.printStackTrace();
@@ -133,51 +140,6 @@ public class DatabaseManager {
 		return false;
 	}
 
-	// ajouter un utilisateur à un groupe
-	public static void addUserToGroup(int idUserAsking, int idGroup, int idInvitedUser) {
-			// 1. check if InvitedUser exists
-			if (existsUser(idInvitedUser)) {
-				// 2. check if invited user is already in the group
-				String queryInvitedUserAlreadyInGroup = "SELECT * FROM groupUsers WHERE idGroup = ? AND idUser = ?";
-				try (Connection connec = getConnection();
-						PreparedStatement stmt2 = connec.prepareStatement(queryInvitedUserAlreadyInGroup)) {
-					
-					stmt2.setInt(1, idGroup);
-					stmt2.setInt(2, idInvitedUser);
-					
-					try (ResultSet rs2 = stmt2.executeQuery()) {
-						if (!rs2.next()) { // if rs.next() == false <=> pas de lignes renvoyées dans la requête,
-							// donc idInvitedUser n'est pas enregistré dans le groupe
-							System.out.println("[DB] Invited user  isn't in the group yet.");
-							// Add invited user to the group
-							String sqlAddUser = "INSERT INTO groupUsers(idGroup, idUser) VALUES (?, ?)";
-							try (Connection connect = getConnection();
-									PreparedStatement stmt3 = connect.prepareStatement(sqlAddUser)) {
-								
-								stmt3.setInt(1, idGroup);
-								stmt3.setInt(2, idInvitedUser);
-								stmt3.executeUpdate();
-								System.out.println(
-										"[DB] Invited user '" + idInvitedUser + "' inserted in group '" + idGroup + "'.");
-							} catch (SQLException e) {
-								System.err.println("[DB] Failed to insert test user: " + e.getMessage());
-								e.printStackTrace();
-							}
-							
-						} else // if rs.next() == true <=> au moins 1 ligne renvoyée par la requête, donc
-							// idInvitedUser est déjà dans le groupe
-							System.out.println("[DB] Invited user is already in the group.");
-					}
-					
-				} catch (SQLException e) {
-					System.err.println("[DB] Failed to check if invited user is in the group: " + e.getMessage());
-					e.printStackTrace();
-				}
-			} else 
-				System.out.println("[DB] Invited user doesn't exist.");
-		
-	}
-
 	public static boolean existsUser(int userId) {
 		String queryInvitedUserExists = "SELECT * FROM users WHERE id = ?";
 		try (Connection conn = getConnection();
@@ -200,51 +162,209 @@ public class DatabaseManager {
 	public static void createNewGroup(int ownerId) {
 		// 1. check if owner exists
 		if (existsUser(ownerId)) {
-		String selectLastGroupIdQuery = "SELECT MIN(idGroup) AS lastGroupId FROM groups";
-		String insertGroupQuery = "INSERT INTO groups (idGroup, idOwner) VALUES (?, ?)";
-		int newGroupId = 0;
+			String selectLastGroupIdQuery = "SELECT MIN(idGroup) AS lastGroupId FROM groups";
+			String insertGroupQuery = "INSERT INTO groups (idGroup, idOwner) VALUES (?, ?)";
+			int newGroupId = 0;
 
-		try (Connection connection = getConnection();
-				PreparedStatement selectStmt = connection.prepareStatement(selectLastGroupIdQuery);
-				PreparedStatement insertStmt = connection.prepareStatement(insertGroupQuery)) {
+			try (Connection connection = getConnection();
+					PreparedStatement selectStmt = connection.prepareStatement(selectLastGroupIdQuery);
+					PreparedStatement insertStmt = connection.prepareStatement(insertGroupQuery)) {
 
-			// récupère l'ID du dernier groupe
-			ResultSet resultSet = selectStmt.executeQuery();
-			int lastGroupId = -1; // Valeur par défaut si aucun groupe n'existe
-			if (resultSet.next()) {
-				lastGroupId = resultSet.getInt("lastGroupId");
+				// récupère l'ID du dernier groupe
+				ResultSet resultSet = selectStmt.executeQuery();
+				int lastGroupId = -1; // Valeur par défaut si aucun groupe n'existe
+				if (resultSet.next()) {
+					lastGroupId = resultSet.getInt("lastGroupId");
+				}
+
+				// calcule le nouvel ID
+				newGroupId = lastGroupId - 1;
+
+				// insère le nouveau groupe
+				insertStmt.setInt(1, newGroupId);
+				insertStmt.setInt(2, ownerId);
+				insertStmt.executeUpdate();
+
+				System.out.println("Nouveau groupe créé avec l'ID : " + newGroupId);
+
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
 
-			// calcule le nouvel ID
-			newGroupId = lastGroupId - 1;
-
-			// insère le nouveau groupe
-			insertStmt.setInt(1, newGroupId);
-			insertStmt.setInt(2, ownerId);
-			insertStmt.executeUpdate();
-
-			System.out.println("Nouveau groupe créé avec l'ID : " + newGroupId);
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		DatabaseManager.addUserToGroup(ownerId, newGroupId, ownerId);
-		} else 
+			DatabaseManager.addUserToGroup(ownerId, newGroupId, ownerId);
+		} else
 			System.out.println("[DB] Owner doesn't exist.");
-		
 	}
 
+	// ajouter un utilisateur à un groupe
+	public static void addUserToGroup(int idUserAsking, int idGroup, int idInvitedUser) {
+		// 1. check if InvitedUser exists
+		if (existsUser(idInvitedUser)) {
+			// 2. check if invited user is already in the group
+			String queryInvitedUserAlreadyInGroup = "SELECT * FROM groupUsers WHERE idGroup = ? AND idUser = ?";
+			try (Connection connec = getConnection();
+					PreparedStatement stmt2 = connec.prepareStatement(queryInvitedUserAlreadyInGroup)) {
+
+				stmt2.setInt(1, idGroup);
+				stmt2.setInt(2, idInvitedUser);
+
+				try (ResultSet rs2 = stmt2.executeQuery()) {
+					if (!rs2.next()) { // if rs.next() == false <=> pas de lignes renvoyées dans la requête,
+						// donc idInvitedUser n'est pas enregistré dans le groupe
+						System.out.println("[DB] Invited user  isn't in the group yet.");
+						// Add invited user to the group
+						String sqlAddUser = "INSERT INTO groupUsers(idGroup, idUser) VALUES (?, ?)";
+						try (Connection connect = getConnection();
+								PreparedStatement stmt3 = connect.prepareStatement(sqlAddUser)) {
+
+							stmt3.setInt(1, idGroup);
+							stmt3.setInt(2, idInvitedUser);
+							stmt3.executeUpdate();
+							System.out.println(
+									"[DB] Invited user '" + idInvitedUser + "' inserted in group '" + idGroup + "'.");
+						} catch (SQLException e) {
+							System.err.println("[DB] Failed to insert test user: " + e.getMessage());
+							e.printStackTrace();
+						}
+
+					} else // if rs.next() == true <=> au moins 1 ligne renvoyée par la requête, donc
+							// idInvitedUser est déjà dans le groupe
+						System.out.println("[DB] Invited user is already in the group.");
+				}
+
+			} catch (SQLException e) {
+				System.err.println("[DB] Failed to check if invited user is in the group: " + e.getMessage());
+				e.printStackTrace();
+			}
+		} else
+			System.out.println("[DB] Invited user doesn't exist.");
+	}
+
+	// enlever un utilisateur d'un groupe
+	/*public static void removeUserFromGroup(int idUserAsking, int idGroup, int idRUser) {
+		// 1. check if InvitedUser exists
+		if (existsUser(idRUser)) {
+			// 2. check if invited user is already in the group
+			String queryRUserAlreadyInGroup = "SELECT * FROM groupUsers WHERE idGroup = ? AND idUser = ?";
+			try (Connection connec = getConnection();
+					PreparedStatement stmt2 = connec.prepareStatement(queryRUserAlreadyInGroup)) {
+
+				stmt2.setInt(1, idGroup);
+				stmt2.setInt(2, idRUser);
+
+		// si idRUser = owner alors suppresion globale du tableau.		
+				
+				
+				try (ResultSet rs2 = stmt2.executeQuery()) {
+					if (rs2.next()) {
+						System.out.println("[DB] User '" + idRUser + "' is in the group.");
+						// Remove user from the group
+						String sqlRemoveUser = "DELETE FROM groupUsers(idGroup, idUser) WHERE idUser = ?";
+						try (Connection connect = getConnection();
+								PreparedStatement stmt3 = connect.prepareStatement(sqlRemoveUser)) {
+
+							stmt3.setInt(2, idRUser);
+							stmt3.executeUpdate();
+							System.out.println("[DB] User '" + idRUser + "' removed from group '" + idGroup + "'.");
+						} catch (SQLException e) {
+							System.err.println("[DB] Failed to remove test user: " + e.getMessage());
+							e.printStackTrace();
+						}
+
+					} else
+						System.out.println("[DB] User '" + idRUser + "' isn't in the group.");
+				}
+
+			} catch (SQLException e) {
+				System.err.println("[DB] Failed to check if invited user is in the group: " + e.getMessage());
+				e.printStackTrace();
+			}
+		} else
+			System.out.println("[DB] User '" + idRUser + "' doesn't exist.");
+	}
+
+
+	// suppression groupe -> isOwner + removeGroup (removeAllGroupUsers +
+	// deleteTheGroup)
+	public static void deleteGroup(int ownerId, int idGroup) {
+		// 1. check if owner exists
+		if (existsUser(ownerId)) {
+			if (isOwner(ownerId) {
+
+			String RemoveGroupQuery = "REMOVE FROM groupUsers (idGroup, idUser) WHERE";
+
+			try (Connection connection = getConnection();
+					PreparedStatement insertStmt = connection.prepareStatement(RemoveGroupQuery)) {
+
+				// récupère l'ID du dernier groupe
+				ResultSet resultSet = selectStmt.executeQuery();
+				int lastGroupId = -1; // Valeur par défaut si aucun groupe n'existe
+				if (resultSet.next()) {
+					lastGroupId = resultSet.getInt("lastGroupId");
+				}
+
+				// calcule le nouvel ID
+				newGroupId = lastGroupId - 1;
+
+				// insère le nouveau groupe
+				insertStmt.setInt(1, newGroupId);
+				insertStmt.setInt(2, ownerId);
+				insertStmt.executeUpdate();
+
+				System.out.println("Nouveau groupe créé avec l'ID : " + newGroupId);
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			DatabaseManager.addUserToGroup(ownerId, newGroupId, ownerId);
+		} else
+			System.out.println("[DB] Owner doesn't exist.");
+
+	} else
+		System.out.println("[DB] Owner doesn't exist.");
+}
+*/
+	
+	//rajouter 20 utilisateurs à la table users
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	// HOW TO les groupes :
+
 	// créer un groupe -> createNewGroup + addUserToGroup
-	// ajouter un utilisateur à un groupe existant/rempli -> isOwner + addUserToGroup
-	
-	
+	// ajouter un utilisateur à un groupe existant/rempli -> isOwner +
+	// addUserToGroup
+	// enlever un utilisateur d'un groupe existant/rempli -> isOwner +
+	// removeUserFromGroup
+	// suppression groupe -> isOwner + removeGroup (removeAllGroupUsers +
+	// deleteTheGroup)
+
+	// -----------------------------------------------------------------------------------//
+	// Création des tables fictives ->
+	// Création de groupe de client temporaires
+	//
 
 	public static void main(String[] args) {
-		//DatabaseManager.createNewGroup(1);
-		//DatabaseManager.addUserToGroup(1, -1, 2);
+		// DatabaseManager.createNewGroup(1);
+		// DatabaseManager.addUserToGroup(1, -1, 2);
 		DatabaseManager.createNewGroup(2);
-    }
+	}
 
+	//A faire:
+	
+	//rajouter 20 utilisateurs à la table users
+	//getRegisteredUsers -> sort un tableau d'id de tous les utilisateurs
+	
+	
+	
+	
 	
 }
