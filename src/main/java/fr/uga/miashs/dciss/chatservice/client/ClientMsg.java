@@ -306,7 +306,7 @@ public class ClientMsg {
                     DataInputStream dis = new DataInputStream(bis);
                     byte responseCode = dis.readByte();
 
-                    if (responseCode == -2) {  // 服务器返回群组列表
+                    if (responseCode == 2) {  // 服务器返回群组列表
                         int groupCount = dis.readInt();
                         System.out.println("Vous êtes dans " + groupCount + " groupes :");
                         for (int i = 0; i < groupCount; i++) {

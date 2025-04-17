@@ -176,14 +176,7 @@ public class ICQ_versDCISS {
 		
 		JPanel panel_10 = new JPanel();
 		panel_1.add(panel_10);
-		panel_10.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JLabel lbl_online = new JLabel("     Online     ");
-		lbl_online.setFont(new Font("Tahoma", Font.BOLD, 11));
-		lbl_online.setForeground(new Color(46, 139, 87));
-		lbl_online.setBounds(new Rectangle(50, 50, 50, 50));
-		lbl_online.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_10.add(lbl_online);
+		panel_10.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel_for_list_online = new JPanel();
 		panel_10.add(panel_for_list_online);
@@ -196,24 +189,12 @@ public class ICQ_versDCISS {
 		txtrOnline = new JTextArea();
 		scrollPane_1.setViewportView(txtrOnline);
 		
-		JPanel panel_11 = new JPanel();
-		panel_1.add(panel_11);
-		panel_11.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JLabel lblNewLabel_3 = new JLabel("     Off line     ");
-		lblNewLabel_3.setFont(new Font("Tahoma", Font.BOLD, 11));
-		lblNewLabel_3.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_3.setBounds(new Rectangle(50, 50, 50, 50));
-		lblNewLabel_3.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		lblNewLabel_3.setForeground(new Color(128, 0, 0));
-		panel_11.add(lblNewLabel_3);
-		
-		JPanel panel_13 = new JPanel();
-		panel_11.add(panel_13);
-		panel_13.setLayout(new BorderLayout(0, 0));
-		
-		JList list_1 = new JList();
-		panel_13.add(list_1);
+		JLabel lbl_online = new JLabel("     Online     ");
+		lbl_online.setForeground(new Color(46, 139, 87));
+		lbl_online.setFont(new Font("Tahoma", Font.BOLD, 11));
+		lbl_online.setBounds(new Rectangle(50, 50, 50, 50));
+		lbl_online.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		panel_10.add(lbl_online, BorderLayout.NORTH);
 		
 		JPanel panel_2 = new JPanel();
 		frame.getContentPane().add(panel_2, BorderLayout.CENTER);
