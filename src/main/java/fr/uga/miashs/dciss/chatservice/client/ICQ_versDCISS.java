@@ -78,6 +78,12 @@ public class ICQ_versDCISS {
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		client = new ClientMsg("localhost", 1666); 
+		
+		//нужно взять метод из сервера  getRegisterUsers() который возвращает массив с номерами id
+		//и рандомно выбрать из него юзера, который еще не коннектед
+		//потом передать id этого юзера в х
+		
+		//client = new ClientMsg(x,"localhost", 1666); 
 		//Un objet ClientMsg est créé, qui se connecte au serveur à l’adresse localhost 
 		//(c’est-à-dire sur le même ordinateur) et au port 1666.
 		
