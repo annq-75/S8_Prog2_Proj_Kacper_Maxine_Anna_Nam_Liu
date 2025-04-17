@@ -26,12 +26,16 @@ import javax.swing.border.TitledBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import java.awt.Font;
+import java.awt.Dimension;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ICQ_versDCISS {
 
 	private JFrame frame;
 	private ClientMsg client;
 	private JTextArea textArea_msgs;
+
 
 	/**
 	 * Launch the application.
@@ -53,6 +57,13 @@ public class ICQ_versDCISS {
 	 * Create the application.
 	 */
 	public ICQ_versDCISS() {
+	    try {
+	        initialize();
+	    } catch (UnknownHostException e) {
+	        e.printStackTrace();
+	        // show err:
+	        JOptionPane.showMessageDialog(null, "Connection to server is impossible.");
+	    }
 	    try {
 	        initialize();
 	    } catch (UnknownHostException e) {
@@ -174,6 +185,7 @@ public class ICQ_versDCISS {
 		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
 		
 		JPanel panel_8 = new JPanel();
+		panel_8.setMaximumSize(new Dimension(10, 32767));
 		panel_8.setBounds(new Rectangle(50, 50, 50, 50));
 		panel_8.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel_2.add(panel_8);
@@ -285,15 +297,6 @@ public class ICQ_versDCISS {
 		panel_17.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel_3.add(panel_17);
 		
-		JPanel panel_5 = new JPanel();
-		frame.getContentPane().add(panel_5, BorderLayout.EAST);
-		
-		JPanel panel_14 = new JPanel();
-		panel_5.add(panel_14);
-		
-		JPanel panel_15 = new JPanel();
-		panel_5.add(panel_15);
-		
 		//close session correct
 		frame.addWindowListener(new java.awt.event.WindowAdapter() {
 		    @Override
@@ -302,16 +305,42 @@ public class ICQ_versDCISS {
 		    }
 		});
 		
-		// Btn "Actualiser"
-		JButton btnActualiser = new JButton("Actualiser les connectés");
-		btnActualiser.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		btnActualiser.setForeground(new Color(0, 102, 51));
-		panel.add(btnActualiser);
-
-		// after btn we send packet with type 2 for online users При нажатии отправляем пакет с типом 2 (запрос онлайн-юзеров)
-		btnActualiser.addActionListener(e -> {
-		    client.sendPacket(0, new byte[]{2}); // type 2 → demander liste en ligne
+		JPanel panel_9 = new JPanel();
+		panel.add(panel_9);
+		panel_9.setLayout(new BorderLayout(0, 0));
+		
+		JButton btnReload = new JButton();
+		btnReload.setText("Reload users online");
+		btnReload.setForeground(new Color(0, 102, 102));
+		btnReload.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		panel_9.add(btnReload, BorderLayout.WEST);
+		
+		JPanel panel_18 = new JPanel();
+		panel_9.add(panel_18, BorderLayout.NORTH);
+		
+		JPanel panel_19 = new JPanel();
+		panel_9.add(panel_19, BorderLayout.SOUTH);
+		
+		JPanel panel_12 = new JPanel();
+		panel.add(panel_12);
+		panel_12.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel_5 = new JPanel();
+		panel_12.add(panel_5, BorderLayout.NORTH);
+		
+		JPanel panel_14 = new JPanel();
+		panel_12.add(panel_14, BorderLayout.SOUTH);
+		
+		JButton btnNewButton = new JButton("Group management ");
+		btnNewButton.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				GroupWindow gr_w = new GroupWindow(client.getIdentifier());
+				gr_w.setVisible(true);
+			}
 		});
+		btnNewButton.setForeground(new Color(0, 128, 128));
+		panel_12.add(btnNewButton, BorderLayout.WEST);
 
 		
 		

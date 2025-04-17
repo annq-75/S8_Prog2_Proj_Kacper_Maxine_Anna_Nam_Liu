@@ -23,7 +23,7 @@ import fr.uga.miashs.dciss.chatservice.common.Packet;
 import java.util.*;
 
 public class ServerMsg {
-	
+
 	private final static Logger LOG = Logger.getLogger(ServerMsg.class.getName());
 	public final static int SERVER_CLIENTID = 0;
 
@@ -31,7 +31,7 @@ public class ServerMsg {
 	private transient boolean started;
 	private transient ExecutorService executor;
 	private transient ServerPacketProcessor sp;
-	
+
 	// maps pour associer les id aux users et groupes
 	private Map<Integer, UserMsg> users;
 	private Map<Integer, GroupMsg> groups;
@@ -50,37 +50,40 @@ public class ServerMsg {
 		serverSock = new ServerSocket(port);
 		started = false;
 		users = new ConcurrentHashMap<>();
-		groups = new ConcurrentHashMap<>(); 
+		groups = new ConcurrentHashMap<>();
 		nextUserId = new AtomicInteger(1);
 		nextGroupId = new AtomicInteger(-1);
 		sp = new ServerPacketProcessor(this);
 		executor = Executors.newCachedThreadPool();
 	}
-	
+
 	public GroupMsg createGroup(int ownerId) {
 		UserMsg owner = users.get(ownerId);
-		if (owner==null) throw new ServerException("User with id="+ownerId+" unknown. Group creation failed.");
+		if (owner == null)
+			throw new ServerException("User with id=" + ownerId + " unknown. Group creation failed.");
 		int id = nextGroupId.getAndDecrement();
-		GroupMsg res = new GroupMsg(id,owner);
+		GroupMsg res = new GroupMsg(id, owner);
 		groups.put(id, res);
-		LOG.info("Group "+res.getId()+" created");
+		LOG.info("Group " + res.getId() + " created");
 		return res;
 	}
-	
+
 	public boolean removeGroup(int groupId) {
-		GroupMsg g =groups.remove(groupId);
-		if (g==null) return false;
+		GroupMsg g = groups.remove(groupId);
+		if (g == null)
+			return false;
 		g.beforeDelete();
 		return true;
 	}
-	
+
 	public boolean removeUser(int userId) {
-		UserMsg u =users.remove(userId);
-		if (u==null) return false;
+		UserMsg u = users.remove(userId);
+		if (u == null)
+			return false;
 		u.beforeDelete();
 		return true;
 	}
-	
+
 	public UserMsg getUser(int userId) {
 		return users.get(userId);
 	}
@@ -91,34 +94,34 @@ public class ServerMsg {
 	// reçu par le serveur
 	public void processPacket(Packet p) {
 		PacketProcessor pp = null;
-		if (p.destId < 0) { //message de groupe
+		if (p.destId < 0) { // message de groupe
 			// can be send only if sender is member
 			UserMsg sender = users.get(p.srcId);
 			GroupMsg g = groups.get(p.destId);
-			if (g.getMembers().contains(sender)) pp=g;
-		}
-		else if (p.destId > 0) { // message entre utilisateurs
-			 pp = users.get(p.destId);
-		}
-		else { // message de gestion pour le serveur
-			pp=sp;
+			if (g.getMembers().contains(sender))
+				pp = g;
+		} else if (p.destId > 0) { // message entre utilisateurs
+			pp = users.get(p.destId);
+		} else { // message de gestion pour le serveur
+			pp = sp;
 		}
 		
 		// Version-Liu
 		if (pp != null) {
 			pp.process(p);
-			
-			// 保存消息历史，假设目标用户在线
-			messageHistory.addMessage(
-				p.destId,
-				new MessageHistory.MessageRecord(p.srcId, p.destId, new String(p.data))
-			);
 		}
+			
+//			// 保存消息历史，假设目标用户在线
+//			messageHistory.addMessage(
+//				p.destId,
+//				new MessageHistory.MessageRecord(p.srcId, p.destId, new String(p.data))
+//			);
+//		}
 		
 		
-		// if (pp != null) {
-		// 	pp.process(p);
-		// }
+//		 if (pp != null) {
+//		 	pp.process(p);
+//		 }
 	}
 
 	public void start() {
@@ -133,7 +136,7 @@ public class ServerMsg {
 
 				// lit l'identifiant du client
 				int userId = dis.readInt();
-				//si 0 alors il faut créer un nouvel utilisateur et
+				// si 0 alors il faut créer un nouvel utilisateur et
 				// envoyer l'identifiant au client
 				if (userId == 0) {
 					userId = nextUserId.getAndIncrement();
@@ -141,13 +144,13 @@ public class ServerMsg {
 					dos.flush();
 					users.put(userId, new UserMsg(userId, this));
 				}
-				// si l'identifiant existe ou est nouveau alors 
-				// deux "taches"/boucles  sont lancées en parralèle
-				// une pour recevoir les messages du client, 
+				// si l'identifiant existe ou est nouveau alors
+				// deux "taches"/boucles sont lancées en parralèle
+				// une pour recevoir les messages du client,
 				// une pour envoyer des messages au client
 				// les deux boucles sont gérées au niveau de la classe UserMsg
 				UserMsg x = users.get(userId);
-				if (x!= null && x.open(s)) {
+				if (x != null && x.open(s)) {
 					LOG.info(userId + " connected");
 					// lancement boucle de reception
 					executor.submit(() -> x.receiveLoop());
@@ -181,13 +184,15 @@ public class ServerMsg {
 	
 
 	public static void main(String[] args) throws IOException {
+		// Initialize the database
+		DatabaseManager.initAllDatabases();
 		ServerMsg s = new ServerMsg(1666);
 		s.start();
 		
 		
 //		//test history- liu
 //		// 初始化数据库
-//		 DatabaseManager.initAllDatabase();
+//		 DatabaseManager.initAllDatabases();
 //		 DatabaseManager.insertTestUser();
 //
 //		 ServerMsg s = new ServerMsg(1666);
