@@ -1,6 +1,7 @@
 package fr.uga.miashs.dciss.chatservice.server;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class DatabaseManager {
 	private static final String DB_URL = "jdbc:sqlite:chatservice.db";
@@ -241,7 +242,7 @@ public class DatabaseManager {
 	}
 
 	// enlever un utilisateur d'un groupe
-	/*public static void removeUserFromGroup(int idUserAsking, int idGroup, int idRUser) {
+	public static void removeUserFromGroup(int idUserAsking, int idGroup, int idRUser) {
 		// 1. check if InvitedUser exists
 		if (existsUser(idRUser)) {
 			// 2. check if invited user is already in the group
@@ -252,9 +253,8 @@ public class DatabaseManager {
 				stmt2.setInt(1, idGroup);
 				stmt2.setInt(2, idRUser);
 
-		// si idRUser = owner alors suppresion globale du tableau.		
-				
-				
+				// si idRUser = owner alors suppresion globale du tableau.
+
 				try (ResultSet rs2 = stmt2.executeQuery()) {
 					if (rs2.next()) {
 						System.out.println("[DB] User '" + idRUser + "' is in the group.");
@@ -283,60 +283,63 @@ public class DatabaseManager {
 			System.out.println("[DB] User '" + idRUser + "' doesn't exist.");
 	}
 
-
 	// suppression groupe -> isOwner + removeGroup (removeAllGroupUsers +
 	// deleteTheGroup)
-	public static void deleteGroup(int ownerId, int idGroup) {
-		// 1. check if owner exists
-		if (existsUser(ownerId)) {
-			if (isOwner(ownerId) {
+	/*
+	 * public static void deleteGroup(int ownerId, int idGroup) { // 1. check if
+	 * owner exists if (existsUser(ownerId)) { if (isOwner(ownerId, idGroup)) {
+	 * 
+	 * String RemoveGroupQuery = "REMOVE FROM groupUsers (idGroup, idUser) WHERE";
+	 * 
+	 * try (Connection connection = getConnection(); PreparedStatement insertStmt =
+	 * connection.prepareStatement(RemoveGroupQuery)) {
+	 * 
+	 * // récupère l'ID du dernier groupe ResultSet resultSet =
+	 * selectStmt.executeQuery(); int lastGroupId = -1; // Valeur par défaut si
+	 * aucun groupe n'existe if (resultSet.next()) { lastGroupId =
+	 * resultSet.getInt("lastGroupId"); }
+	 * 
+	 * // calcule le nouvel ID newGroupId = lastGroupId - 1;
+	 * 
+	 * // insère le nouveau groupe insertStmt.setInt(1, newGroupId);
+	 * insertStmt.setInt(2, ownerId); insertStmt.executeUpdate();
+	 * 
+	 * System.out.println("Nouveau groupe créé avec l'ID : " + newGroupId);
+	 * 
+	 * } catch (SQLException e) { e.printStackTrace(); }
+	 * 
+	 * DatabaseManager.addUserToGroup(ownerId, newGroupId, ownerId); } else
+	 * System.out.println("[DB] Owner doesn't exist.");
+	 * 
+	 * } else System.out.println("[DB] Owner doesn't exist."); }
+	 */
 
-			String RemoveGroupQuery = "REMOVE FROM groupUsers (idGroup, idUser) WHERE";
+	public static int[] getRegisteredUsers() {
+		// Liste temporaire pour stocker les IDs des utilisateurs
+		ArrayList<Integer> userIds = new ArrayList<>();
 
-			try (Connection connection = getConnection();
-					PreparedStatement insertStmt = connection.prepareStatement(RemoveGroupQuery)) {
+		String queryGetUsers = "SELECT id FROM users";
+		try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(queryGetUsers)) {
 
-				// récupère l'ID du dernier groupe
-				ResultSet resultSet = selectStmt.executeQuery();
-				int lastGroupId = -1; // Valeur par défaut si aucun groupe n'existe
-				if (resultSet.next()) {
-					lastGroupId = resultSet.getInt("lastGroupId");
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					userIds.add(rs.getInt("id"));
 				}
-
-				// calcule le nouvel ID
-				newGroupId = lastGroupId - 1;
-
-				// insère le nouveau groupe
-				insertStmt.setInt(1, newGroupId);
-				insertStmt.setInt(2, ownerId);
-				insertStmt.executeUpdate();
-
-				System.out.println("Nouveau groupe créé avec l'ID : " + newGroupId);
-
-			} catch (SQLException e) {
-				e.printStackTrace();
 			}
+		} catch (SQLException e) {
+			System.err.println("[DB] Failed to retrieve all users: " + e.getMessage());
+			e.printStackTrace();
+		}
 
-			DatabaseManager.addUserToGroup(ownerId, newGroupId, ownerId);
-		} else
-			System.out.println("[DB] Owner doesn't exist.");
+		// Convertir la liste en tableau
+		int[] allUsers = new int[userIds.size()];
+		for (int i = 0; i < userIds.size(); i++) {
+			allUsers[i] = userIds.get(i);
+		}
+		return allUsers;
+	}
 
-	} else
-		System.out.println("[DB] Owner doesn't exist.");
-}
-*/
-	
-	//rajouter 20 utilisateurs à la table users
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	// HOW TO les groupes :
 
 	// créer un groupe -> createNewGroup + addUserToGroup
@@ -357,14 +360,4 @@ public class DatabaseManager {
 		// DatabaseManager.addUserToGroup(1, -1, 2);
 		DatabaseManager.createNewGroup(2);
 	}
-
-	//A faire:
-	
-	//rajouter 20 utilisateurs à la table users
-	//getRegisteredUsers -> sort un tableau d'id de tous les utilisateurs
-	
-	
-	
-	
-	
 }
