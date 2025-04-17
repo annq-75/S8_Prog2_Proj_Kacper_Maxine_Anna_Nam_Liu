@@ -241,8 +241,15 @@ public class GroupWindow extends JFrame {
 		client.addMessageListener(p -> {
 			try {
 				if (p.data.length > 0 && p.data[0] == 4) {
-					String msg = new String(p.data, 1, p.data.length - 1);
-					updateGroupListFromString(msg);
+					//String msg = new String(p.data, 1, p.data.length - 1);
+					//updateGroupListFromString(msg);
+					ByteBuffer buffer = ByteBuffer.wrap(p.data, 1, p.data.length - 1);
+					StringBuilder sb = new StringBuilder();
+					while (buffer.remaining() >= 4) {
+					    int groupId = buffer.getInt();
+					    sb.append(groupId).append(",");
+					}
+					updateGroupListFromString(sb.toString());
 				}
 			} catch (Exception e) {
 				System.err.println("Ошибка при чтении ответа сервера");

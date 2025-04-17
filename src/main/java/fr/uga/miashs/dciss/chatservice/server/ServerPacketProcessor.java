@@ -11,6 +11,9 @@
 
 package fr.uga.miashs.dciss.chatservice.server;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -101,7 +104,8 @@ public class ServerPacketProcessor implements PacketProcessor {
 			int memberId = data.getInt();
 			UserMsg member = server.getUser(memberId);
 			if (member != null) {
-				g.addMember(member);
+				g.addMember(member);// Группа знает участника
+				member.addGroup(g);      // Участник знает группу
 			}
 		}
 		// Envoi d'un accusé de réception
@@ -140,8 +144,8 @@ public class ServerPacketProcessor implements PacketProcessor {
 	 * sendTextResponse(requesterId, sb.toString()); }
 	 */
 
-	// ----------- Envoi des groupes auxquels appartient l'utilisateur -----------
-	private void sendUserGroups(int userId) {
+	// ----------- Envoi des groupes auxquels appartient l'utilisateur -----------Anna
+	/*private void sendUserGroups(int userId) {
 		UserMsg user = server.getUser(userId);
 		if (user == null)
 			return;
@@ -152,6 +156,31 @@ public class ServerPacketProcessor implements PacketProcessor {
 			sb.append(g.getId()).append(",");
 		}
 		sendTextResponse(userId, sb.toString());
+	}*/
+	
+	private void sendUserGroups(int userId) {
+	    UserMsg user = server.getUser(userId);
+	    if (user == null)
+	        return;
+
+	    Set<GroupMsg> groups = user.getGroups();
+	    try {
+	        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	        DataOutputStream dos = new DataOutputStream(bos);
+
+	        dos.writeByte(4); // тип ответа
+	        for (GroupMsg g : groups) {
+	            dos.writeInt(g.getId());
+	        }
+
+	        dos.flush();
+	        byte[] data = bos.toByteArray();
+	        Packet packet = new Packet(ServerMsg.SERVER_CLIENTID, userId, data);
+	        user.process(packet); // отправляем
+
+		} catch (IOException e) {
+	        e.printStackTrace();
+	    }
 	}
 
 	// ----------- Méthode d'envoi d'un message texte générique -----------
