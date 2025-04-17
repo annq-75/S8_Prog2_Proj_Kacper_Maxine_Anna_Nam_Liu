@@ -30,6 +30,9 @@ import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.Dimension;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ICQ_versDCISS {
 
@@ -59,6 +62,13 @@ public class ICQ_versDCISS {
 	 * Create the application.
 	 */
 	public ICQ_versDCISS() {
+	    try {
+	        initialize();
+	    } catch (UnknownHostException e) {
+	        e.printStackTrace();
+	        // show err:
+	        JOptionPane.showMessageDialog(null, "Connection to server is impossible.");
+	    }
 	    try {
 	        initialize();
 	    } catch (UnknownHostException e) {
@@ -220,6 +230,7 @@ public class ICQ_versDCISS {
 		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
 		
 		JPanel panel_8 = new JPanel();
+		panel_8.setMaximumSize(new Dimension(10, 32767));
 		panel_8.setMaximumSize(new Dimension(10, 32767));
 		panel_8.setBounds(new Rectangle(50, 50, 50, 50));
 		panel_8.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));

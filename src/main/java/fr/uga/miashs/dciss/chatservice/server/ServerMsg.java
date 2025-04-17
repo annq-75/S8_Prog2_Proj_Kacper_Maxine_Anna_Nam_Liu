@@ -24,6 +24,7 @@ import java.util.*;
 
 public class ServerMsg {
 
+
 	private final static Logger LOG = Logger.getLogger(ServerMsg.class.getName());
 	public final static int SERVER_CLIENTID = 0;
 
@@ -31,6 +32,7 @@ public class ServerMsg {
 	private transient boolean started;
 	private transient ExecutorService executor;
 	private transient ServerPacketProcessor sp;
+
 
 	// maps pour associer les id aux users et groupes
 	private Map<Integer, UserMsg> users;
@@ -52,6 +54,7 @@ public class ServerMsg {
 		started = false;
 		users = new ConcurrentHashMap<>();
 		groups = new ConcurrentHashMap<>();
+		groups = new ConcurrentHashMap<>();
 		nextUserId = new AtomicInteger(1);
 		nextGroupId = new AtomicInteger(-1);
 		sp = new ServerPacketProcessor(this);
@@ -62,14 +65,21 @@ public class ServerMsg {
 		UserMsg owner = users.get(ownerId);
 		if (owner == null)
 			throw new ServerException("User with id=" + ownerId + " unknown. Group creation failed.");
+		if (owner == null)
+			throw new ServerException("User with id=" + ownerId + " unknown. Group creation failed.");
 		int id = nextGroupId.getAndDecrement();
 		GroupMsg res = new GroupMsg(id, owner, name);
 		groups.put(id, res);
 		LOG.info("Group " + res.getId() + " created");
+		LOG.info("Group " + res.getId() + " created");
 		return res;
 	}
 
+
 	public boolean removeGroup(int groupId) {
+		GroupMsg g = groups.remove(groupId);
+		if (g == null)
+			return false;
 		GroupMsg g = groups.remove(groupId);
 		if (g == null)
 			return false;
@@ -77,13 +87,18 @@ public class ServerMsg {
 		return true;
 	}
 
+
 	public boolean removeUser(int userId) {
+		UserMsg u = users.remove(userId);
+		if (u == null)
+			return false;
 		UserMsg u = users.remove(userId);
 		if (u == null)
 			return false;
 		u.beforeDelete();
 		return true;
 	}
+
 
 	public UserMsg getUser(int userId) {
 		return users.get(userId);
@@ -120,6 +135,7 @@ public class ServerMsg {
 				// lit l'identifiant du client
 				int userId = dis.readInt();
 				// si 0 alors il faut créer un nouvel utilisateur et
+				// si 0 alors il faut créer un nouvel utilisateur et
 				// envoyer l'identifiant au client
 				if (userId == 0) {
 					userId = nextUserId.getAndIncrement();
@@ -130,9 +146,13 @@ public class ServerMsg {
 				// si l'identifiant existe ou est nouveau alors
 				// deux "taches"/boucles sont lancées en parralèle
 				// une pour recevoir les messages du client,
+				// si l'identifiant existe ou est nouveau alors
+				// deux "taches"/boucles sont lancées en parralèle
+				// une pour recevoir les messages du client,
 				// une pour envoyer des messages au client
 				// les deux boucles sont gérées au niveau de la classe UserMsg
 				UserMsg x = users.get(userId);
+				if (x != null && x.open(s)) {
 				if (x != null && x.open(s)) {
 					LOG.info(userId + " connected");
 					// lancement boucle de reception
@@ -176,7 +196,7 @@ public class ServerMsg {
 		
 //		//test history- liu
 //		// 初始化数据库
-//		 DatabaseManager.initAllDatabase();
+//		 DatabaseManager.initAllDatabases();
 //		 DatabaseManager.insertTestUser();
 //
 //		 ServerMsg s = new ServerMsg(1666);

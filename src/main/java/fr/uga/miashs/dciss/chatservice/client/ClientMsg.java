@@ -203,132 +203,152 @@ public class ClientMsg {
 
 	//=============================================Ajout menu - Version Liu============================================================
         //Ajout un menu pour demander au user s'il veux créer un groupe
-        public void handleUserInteraction() {
-            Scanner sc = new Scanner(System.in);
-            String input = "";
-
-            while (true) {
-                System.out.println("\nQue voulez-vous faire ?");
-                System.out.println("1. Envoyer un message");
-                System.out.println("2. Créer un groupe");
-                System.out.println("3. Voir mes groupes");
-                System.out.println("4. Quitter");
-                System.out.print("Votre choix: ");
-                input = sc.nextLine();
-
-                switch (input) {
-                    case "1":
-                        handleSendMessage(sc);
-                        break;
-                    case "2":
-                        handleCreateGroup(sc);
-                        break;
-                    case "3":
-                    	handleQueryGroups();
-                    	break;
-                    case "4":
-                        closeSession();
-                        return;
-                    default:
-                        System.out.println("Choix invalide !");
-                }
-            }
-        }
-        
-        private void handleSendMessage(Scanner sc) {
-            try {
-                System.out.print("ID du destinataire (Utilisateur positif / Groupe négatif) : ");
-                int destId = Integer.parseInt(sc.nextLine());
-
-                System.out.print("Votre message : ");
-                String message = sc.nextLine();
-
-                sendPacket(destId, message.getBytes());  // 复用sendPacket
-                System.out.println("Message envoyé à " + destId);
-
-            } catch (NumberFormatException e) {
-                System.out.println("Identifiant invalide !");
-            }
-        }
-        
-        private void handleCreateGroup(Scanner sc) {
-            try {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                DataOutputStream dos = new DataOutputStream(bos);
-
-                dos.writeByte(1);  // 操作码1：创建群组
-
-                System.out.print("Combien de membres voulez-vous ajouter ? ");
-                int nbMembers = Integer.parseInt(sc.nextLine());
-                dos.writeInt(nbMembers);
-
-                for (int i = 0; i < nbMembers; i++) {
-                    System.out.print("ID du membre " + (i + 1) + " : ");
-                    int memberId = Integer.parseInt(sc.nextLine());
-                    dos.writeInt(memberId);
-                }
-
-                dos.flush();
-                sendPacket(0, bos.toByteArray());  // 0 = 发给服务器，要求创建群组
-                System.out.println("Demande de création de groupe envoyée au serveur.");
-
-            } catch (Exception e) {
-                System.out.println("Erreur lors de la création du groupe : " + e.getMessage());
-            }
-        }
-        
-        private void handleQueryGroups() {
-            try {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                DataOutputStream dos = new DataOutputStream(bos);
-
-                dos.writeByte(-2);  // 操作码2：查询群组
-                dos.flush();
-
-                sendPacket(0, bos.toByteArray());  // 发给服务器
-                System.out.println("Demande de liste des groupes envoyée au serveur.");
-
-            } catch (Exception e) {
-                System.out.println("Erreur lors de la demande : " + e.getMessage());
-            }
-        }
+//        public void handleUserInteraction() {
+//            Scanner sc = new Scanner(System.in);
+//            String input = "";
+//
+//            while (true) {
+//                System.out.println("\nQue voulez-vous faire ?");
+//                System.out.println("1. Envoyer un message");
+//                System.out.println("2. Créer un groupe");
+//                System.out.println("3. Voir mes groupes");
+//                System.out.println("4. Quitter");
+//                System.out.print("Votre choix: ");
+//                input = sc.nextLine();
+//
+//                switch (input) {
+//                    case "1":
+//                        handleSendMessage(sc);
+//                        break;
+//                    case "2":
+//                        handleCreateGroup(sc);
+//                        break;
+//                    case "3":
+//                    	handleQueryGroups();
+//                    	break;
+//                    case "4":
+//                        closeSession();
+//                        return;
+//                    default:
+//                        System.out.println("Choix invalide !");
+//                }
+//            }
+//        }
+//        
+//        private void handleSendMessage(Scanner sc) {
+//            try {
+//                System.out.print("ID du destinataire (Utilisateur positif / Groupe négatif) : ");
+//                int destId = Integer.parseInt(sc.nextLine());
+//
+//                System.out.print("Votre message : ");
+//                String message = sc.nextLine();
+//
+//                sendPacket(destId, message.getBytes());  // 复用sendPacket
+//                System.out.println("Message envoyé à " + destId);
+//
+//            } catch (NumberFormatException e) {
+//                System.out.println("Identifiant invalide !");
+//            }
+//        }
+//        
+//        private void handleCreateGroup(Scanner sc) {
+//            try {
+//                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//                DataOutputStream dos = new DataOutputStream(bos);
+//
+//                dos.writeByte(1);  // 操作码1：创建群组
+//
+//                System.out.print("Combien de membres voulez-vous ajouter ? ");
+//                int nbMembers = Integer.parseInt(sc.nextLine());
+//                dos.writeInt(nbMembers);
+//
+//                for (int i = 0; i < nbMembers; i++) {
+//                    System.out.print("ID du membre " + (i + 1) + " : ");
+//                    int memberId = Integer.parseInt(sc.nextLine());
+//                    dos.writeInt(memberId);
+//                }
+//
+//                dos.flush();
+//                sendPacket(0, bos.toByteArray());  // 0 = 发给服务器，要求创建群组
+//                System.out.println("Demande de création de groupe envoyée au serveur.");
+//
+//            } catch (Exception e) {
+//                System.out.println("Erreur lors de la création du groupe : " + e.getMessage());
+//            }
+//        }
+//        
+//        private void handleQueryGroups() {
+//            try {
+//                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//                DataOutputStream dos = new DataOutputStream(bos);
+//
+//                dos.writeByte(-2);  // 操作码2：查询群组
+//                dos.flush();
+//
+//                sendPacket(0, bos.toByteArray());  // 发给服务器
+//                System.out.println("Demande de liste des groupes envoyée au serveur.");
+//
+//            } catch (Exception e) {
+//                System.out.println("Erreur lors de la demande : " + e.getMessage());
+//            }
+//        }
 
 
 		public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {
-            ClientMsg c = new ClientMsg("localhost", 1666);
-
-            // add a dummy listener that print the content of message as a string
-            //c.addMessageListener(p -> System.out.println(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
-            
-            c.addMessageListener(p -> {
-                try {
-                    ByteArrayInputStream bis = new ByteArrayInputStream(p.data);
-                    DataInputStream dis = new DataInputStream(bis);
-                    byte responseCode = dis.readByte();
-
-                    if (responseCode == -2) {  // 服务器返回群组列表
-                        int groupCount = dis.readInt();
-                        System.out.println("Vous êtes dans " + groupCount + " groupes :");
-                        for (int i = 0; i < groupCount; i++) {
-                            int groupId = dis.readInt();
-                            System.out.println("- Groupe ID: " + groupId);
-                        }
-                    } else {
-                        // 普通消息
-                        System.out.println(p.srcId + " says to " + p.destId + ": " + new String(p.data));
-                    }
-                } catch (IOException e) {
-                    System.out.println("Erreur lors de la lecture du paquet.");
-                }
-            });
-            
-            // add a connection listener that exit application when connection closed
-            c.addConnectionListener(active ->  {if (!active) System.exit(0);});
-
-            c.startSession();
-            System.out.println("Vous êtes : " + c.getIdentifier());
-            
-            c.handleUserInteraction();
+			//===================version Liu - commenter pour tester ClientChatInteractif.java===========================
+//            ClientMsg c = new ClientMsg("localhost", 1666);
+//
+//            // add a dummy listener that print the content of message as a string
+//            //c.addMessageListener(p -> System.out.println(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
+//            
+//            c.addMessageListener(p -> {
+//                try {
+//                    ByteArrayInputStream bis = new ByteArrayInputStream(p.data);
+//                    DataInputStream dis = new DataInputStream(bis);
+//                    byte responseCode = dis.readByte();
+//
+//                    if (responseCode == -2) {  // 服务器返回群组列表
+//                        int groupCount = dis.readInt();
+//                        System.out.println("Vous êtes dans " + groupCount + " groupes :");
+//                        for (int i = 0; i < groupCount; i++) {
+//                            int groupId = dis.readInt();
+//                            System.out.println("- Groupe ID: " + groupId);
+//                        }
+//                    } else {
+//                        // 普通消息
+//                        System.out.println(p.srcId + " says to " + p.destId + ": " + new String(p.data));
+//                    }
+//                } catch (IOException e) {
+//                    System.out.println("Erreur lors de la lecture du paquet.");
+//                }
+//            });
+//            
+//            // add a connection listener that exit application when connection closed
+//            c.addConnectionListener(active ->  {if (!active) System.exit(0);});
+//
+//            c.startSession();
+//            System.out.println("Vous êtes : " + c.getIdentifier());
+//            
+//            c.handleUserInteraction();
+//			Scanner sc = new Scanner(System.in);
+//            String lu = null;
+//            while (!"\\quit".equals(lu)) {
+//                try {
+//                    System.out.println("A qui voulez vous écrire ? ");
+//                    int dest = Integer.parseInt(sc.nextLine());
+//
+//                    System.out.println("Votre message ? ");
+//                    lu = sc.nextLine();
+//                    c.sendPacket(dest, lu.getBytes());
+//                } catch (InputMismatchException | NumberFormatException e) {
+//                    System.out.println("Mauvais format");
+//                }
+//
+//            }
+//			c.closeSession();
+//==========================================================================================================
+			
+			
             // Thread.sleep(5000);
 
             // l'utilisateur avec id 4 crée un grp avec 1 et 3 dedans (et lui meme)
@@ -352,21 +372,7 @@ public class ClientMsg {
             
             
 
-            Scanner sc = new Scanner(System.in);
-            String lu = null;
-            while (!"\\quit".equals(lu)) {
-                try {
-                    System.out.println("A qui voulez vous écrire ? ");
-                    int dest = Integer.parseInt(sc.nextLine());
-
-                    System.out.println("Votre message ? ");
-                    lu = sc.nextLine();
-                    c.sendPacket(dest, lu.getBytes());
-                } catch (InputMismatchException | NumberFormatException e) {
-                    System.out.println("Mauvais format");
-                }
-
-            }
+            
 
             /*
              * int id =1+(c.getIdentifier()-1) % 2; System.out.println("send to "+id);
@@ -376,7 +382,7 @@ public class ClientMsg {
              * Thread.sleep(10000);
              */
 
-            c.closeSession();
+            
 
         }
 
