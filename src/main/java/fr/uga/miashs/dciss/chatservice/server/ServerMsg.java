@@ -187,7 +187,7 @@ public class ServerMsg {
 
 	public static void main(String[] args) throws IOException {
 		// Initialize the database
-		DatabaseManager.initAllDatabases();
+		/*DatabaseManager.initAllDatabases();
 		DatabaseManager.insertTestUser("Anna", "0000");
 		DatabaseManager.insertTestUser("Nam", "0000");
 		DatabaseManager.insertTestUser("Kacper", "0000");
@@ -207,6 +207,9 @@ public class ServerMsg {
 		DatabaseManager.insertTestUser("Anouar", "0000");
 		DatabaseManager.insertTestUser("Yanis Sami", "0000");
 		DatabaseManager.insertTestUser("Abdmelmadjid", "0000");
+		*/
+		
+		
 
 
 		ServerMsg s = new ServerMsg(1666);
