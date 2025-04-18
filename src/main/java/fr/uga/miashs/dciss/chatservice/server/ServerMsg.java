@@ -187,27 +187,27 @@ public class ServerMsg {
 
 	public static void main(String[] args) throws IOException {
 		// Initialize the database
-		/*DatabaseManager.initAllDatabases();
-		DatabaseManager.insertTestUser("Anna", "0000");
-		DatabaseManager.insertTestUser("Nam", "0000");
-		DatabaseManager.insertTestUser("Kacper", "0000");
-		DatabaseManager.insertTestUser("Maria", "0000");
-		DatabaseManager.insertTestUser("Ilef", "0000");
-		DatabaseManager.insertTestUser("Amina", "0000");
-		DatabaseManager.insertTestUser("Laurent", "0000");
-		DatabaseManager.insertTestUser("Van-Louis", "0000");
-		DatabaseManager.insertTestUser("Marc Arold", "0000");
-		DatabaseManager.insertTestUser("Nicolas", "0000");
-		DatabaseManager.insertTestUser("Hanay", "0000");
-		DatabaseManager.insertTestUser("Alexandra", "0000");
-		DatabaseManager.insertTestUser("Haruka", "0000");
-		DatabaseManager.insertTestUser("Ofelia", "0000");
-		DatabaseManager.insertTestUser("Ayla", "0000");
-		DatabaseManager.insertTestUser("Samer", "0000");
-		DatabaseManager.insertTestUser("Anouar", "0000");
-		DatabaseManager.insertTestUser("Yanis Sami", "0000");
-		DatabaseManager.insertTestUser("Abdmelmadjid", "0000");
-		*/
+//		DatabaseManager.initAllDatabases();
+//		DatabaseManager.insertTestUser("Anna", "0000");
+//		DatabaseManager.insertTestUser("Nam", "0000");
+//		DatabaseManager.insertTestUser("Kacper", "0000");
+//		DatabaseManager.insertTestUser("Maria", "0000");
+//		DatabaseManager.insertTestUser("Ilef", "0000");
+//		DatabaseManager.insertTestUser("Amina", "0000");
+//		DatabaseManager.insertTestUser("Laurent", "0000");
+//		DatabaseManager.insertTestUser("Van-Louis", "0000");
+//		DatabaseManager.insertTestUser("Marc Arold", "0000");
+//		DatabaseManager.insertTestUser("Nicolas", "0000");
+//		DatabaseManager.insertTestUser("Hanay", "0000");
+//		DatabaseManager.insertTestUser("Alexandra", "0000");
+//		DatabaseManager.insertTestUser("Haruka", "0000");
+//		DatabaseManager.insertTestUser("Ofelia", "0000");
+//		DatabaseManager.insertTestUser("Ayla", "0000");
+//		DatabaseManager.insertTestUser("Samer", "0000");
+//		DatabaseManager.insertTestUser("Anouar", "0000");
+//		DatabaseManager.insertTestUser("Yanis Sami", "0000");
+//		DatabaseManager.insertTestUser("Abdmelmadjid", "0000");
+		
 		
 		
 
