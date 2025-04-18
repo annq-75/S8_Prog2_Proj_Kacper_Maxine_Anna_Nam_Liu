@@ -267,4 +267,9 @@ public class ServerMsg {
 	public Map<Integer, GroupMsg> getGroups() {
 	    return groups;
 	}
+	
+	public int[] getRegisterUsers() {//--anna
+		return DatabaseManager.getRegisteredUsers();
+	}
+	
 }

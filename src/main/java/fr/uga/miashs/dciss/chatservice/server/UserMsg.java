@@ -24,7 +24,7 @@ public class UserMsg implements PacketProcessor{
 	private final static Logger LOG = Logger.getLogger(UserMsg.class.getName());
 	
 	private int userId;
-	private Set<GroupMsg> groups;
+	private Set<GroupMsg> groups;//поле хранящее групп пользователя
 	
 	private ServerMsg server;
 	private transient Socket s;
@@ -150,6 +150,13 @@ public class UserMsg implements PacketProcessor{
 	// cette méthode est généralement appelée par ServerMsg
 	public void process(Packet p) {
 		sendQueue.offer(p);
+	}
+
+	public void addGroup(GroupMsg g) {//чтобы юзер знал группу
+		// TODO Auto-generated method stub
+		if (g != null) {
+	        groups.add(g);
+	    }
 	}
 	
 }
