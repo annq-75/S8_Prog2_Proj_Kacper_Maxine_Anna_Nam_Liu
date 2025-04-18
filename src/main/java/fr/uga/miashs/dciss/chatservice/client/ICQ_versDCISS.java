@@ -377,7 +377,7 @@ public class ICQ_versDCISS {
 		btnNewButton.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				GroupWindow gr_w = new GroupWindow(client.getIdentifier());
+				GroupWindow gr_w = new GroupWindow(client.getIdentifier(), client);
 				gr_w.setVisible(true);
 			}
 		});

@@ -40,6 +40,10 @@ public class ClientMsg {
 
 	private List<MessageListener> mListeners;
 	private List<ConnectionListener> cListeners;
+	
+	//classe client packet processor pour gérer les process
+	
+	private ClientPacketProcessor processor;
 
 	/**
 	 * Create a client with an existing id, that will connect to the server at the

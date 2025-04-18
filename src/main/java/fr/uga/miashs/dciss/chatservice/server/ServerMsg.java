@@ -63,7 +63,9 @@ public class ServerMsg {
 			throw new ServerException("User with id=" + ownerId + " unknown. Group creation failed.");
 		int id = nextGroupId.getAndDecrement();
 		GroupMsg res = new GroupMsg(id, owner);
+		
 		groups.put(id, res);
+		System.out.println("à l'intérieur de server msg?? arche???");
 		LOG.info("Group " + res.getId() + " created");
 		return res;
 	}
@@ -95,8 +97,15 @@ public class ServerMsg {
 	public void processPacket(Packet p) {
 		System.out.println("Processing message from " + p.srcId + " to " + p.destId);//test line Anna
 		System.out.println("[SERVER] Packet received: from " + p.srcId + " to " + p.destId);//test line Anna
+		System.out.println("le type : " + p.data[0]);
 		
 		PacketProcessor pp = null;
+		
+		//-------------------------process du packet------------------------
+		sp.process(p);
+		//--------------------------------------------------------------------
+		
+		
 		if (p.destId < 0) { // message de groupe
 			// can be send only if sender is member
 			UserMsg sender = users.get(p.srcId);

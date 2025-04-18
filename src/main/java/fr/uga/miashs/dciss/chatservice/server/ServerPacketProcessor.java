@@ -42,10 +42,13 @@ public class ServerPacketProcessor implements PacketProcessor {
 
 		if (type == 1) {//--Anna
 			// FR : Création d’un nouveau groupe -- RU: Создание новой группы
+			System.out.println("Création de goupe");
 			createGroup(p.srcId, buf);
+			System.out.println("groupe crée");
 
 		} else if (type == 2) { //Anna
 			// FR : Envoi des utilisateurs en ligne -- RU: Список пользователей онлайн
+			System.out.println("Renvoie d'utilisateurs en ligne");
 			sendOnlineUsers(p.srcId);
 
 		}
@@ -60,15 +63,15 @@ public class ServerPacketProcessor implements PacketProcessor {
 
 		} else if (type == 5) {
 			// suppression de groupe
+			System.out.println("Suppression de groupe");
 			removeGroup(p.srcId, buf);
-			// on passe en paramètres l'id de l'utilisateur qui essai de faire l'action
-			// on envoie en paramètre aussi la partie du paquet qui contient l'information
-			// sur le groupe
 		} else if (type == 6) {
 			// ajout utilisateurs
+			System.out.println("Ajout membre");
 			addMember(p.srcId, null, null);
 		} else if (type == 7) {
 			// suppression d'utilisateurs
+			System.out.println("Suppression membre");
 			removeMember(null, null, null);
 		} else if (type == 8) {
 			// envoie de message -> à créer dans la classe clientMsg?? ou userMsg??
@@ -95,7 +98,16 @@ public class ServerPacketProcessor implements PacketProcessor {
 
 	// ----------- Création de groupe -----------
 	public void createGroup(int ownerId, ByteBuffer data) {
-		int nb = data.getInt();
+		System.out.println("à l'intérieur de server processor -> create group -> début");
+		int nb;
+		if(data == null || data.remaining() == 0 ) {
+			nb = 0;
+			System.out.println("nb = 0");
+		}else {
+			nb = data.getInt();
+			System.out.println("nb = data get int");
+		}
+		System.out.println("à l'intérieur de server processor -> create group -> apres nb");
 		GroupMsg g = server.createGroup(ownerId);
 		for (int i = 0; i < nb; i++) {
 			int memberId = data.getInt();
