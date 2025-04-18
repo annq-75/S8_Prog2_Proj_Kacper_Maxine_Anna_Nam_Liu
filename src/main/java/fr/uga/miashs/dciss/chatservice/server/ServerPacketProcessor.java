@@ -171,8 +171,12 @@ public class ServerPacketProcessor implements PacketProcessor {
 	        dos.writeByte(4); // тип ответа
 	        for (GroupMsg g : groups) {
 	            dos.writeInt(g.getId());
+	            Set<UserMsg> users = g.getMembers();
+	            dos.writeInt(users.size());
 	        }
-
+	        
+	        sendTextResponse(userId, dos.toString());
+	        
 	        dos.flush();
 	        byte[] data = bos.toByteArray();
 	        Packet packet = new Packet(ServerMsg.SERVER_CLIENTID, userId, data);
